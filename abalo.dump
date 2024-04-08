@@ -1,0 +1,81 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 16.2
+-- Dumped by pg_dump version 16.2
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+ALTER TABLE ONLY public.ab_testdata DROP CONSTRAINT ab_testdata_pk;
+ALTER TABLE ONLY public.ab_testdata DROP CONSTRAINT ab_testdata_ab_testname_key;
+DROP TABLE public.ab_testdata;
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: ab_testdata; Type: TABLE; Schema: public; Owner: dev
+--
+
+CREATE TABLE public.ab_testdata (
+    id bigint NOT NULL,
+    ab_testname character varying(80) NOT NULL
+);
+
+
+ALTER TABLE public.ab_testdata OWNER TO dev;
+
+--
+-- Name: COLUMN ab_testdata.id; Type: COMMENT; Schema: public; Owner: dev
+--
+
+COMMENT ON COLUMN public.ab_testdata.id IS 'Primärschlüssel';
+
+
+--
+-- Name: COLUMN ab_testdata.ab_testname; Type: COMMENT; Schema: public; Owner: dev
+--
+
+COMMENT ON COLUMN public.ab_testdata.ab_testname IS 'Testname eines Artikels';
+
+
+--
+-- Data for Name: ab_testdata; Type: TABLE DATA; Schema: public; Owner: dev
+--
+
+COPY public.ab_testdata (id, ab_testname) FROM stdin;
+1	Fotokamera
+2	Blitzlicht
+\.
+
+
+--
+-- Name: ab_testdata ab_testdata_ab_testname_key; Type: CONSTRAINT; Schema: public; Owner: dev
+--
+
+ALTER TABLE ONLY public.ab_testdata
+    ADD CONSTRAINT ab_testdata_ab_testname_key UNIQUE (ab_testname);
+
+
+--
+-- Name: ab_testdata ab_testdata_pk; Type: CONSTRAINT; Schema: public; Owner: dev
+--
+
+ALTER TABLE ONLY public.ab_testdata
+    ADD CONSTRAINT ab_testdata_pk PRIMARY KEY (id);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
