@@ -16,9 +16,34 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+DROP INDEX public.sessions_user_id_index;
+DROP INDEX public.sessions_last_activity_index;
+ALTER TABLE ONLY public.sessions DROP CONSTRAINT sessions_pkey;
+ALTER TABLE ONLY public.migrations DROP CONSTRAINT migrations_pkey;
 ALTER TABLE ONLY public.ab_testdata DROP CONSTRAINT ab_testdata_pk;
 ALTER TABLE ONLY public.ab_testdata DROP CONSTRAINT ab_testdata_ab_testname_key;
+ALTER TABLE public.migrations ALTER COLUMN id DROP DEFAULT;
+DROP TABLE public.sessions;
+DROP SEQUENCE public.migrations_id_seq;
+DROP TABLE public.migrations;
 DROP TABLE public.ab_testdata;
+-- *not* dropping schema, since initdb creates it
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: dev
+--
+
+-- *not* creating schema, since initdb creates it
+
+
+ALTER SCHEMA public OWNER TO dev;
+
+--
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: dev
+--
+
+COMMENT ON SCHEMA public IS '';
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -50,6 +75,64 @@ COMMENT ON COLUMN public.ab_testdata.ab_testname IS 'Testname eines Artikels';
 
 
 --
+-- Name: migrations; Type: TABLE; Schema: public; Owner: dev
+--
+
+CREATE TABLE public.migrations (
+    id integer NOT NULL,
+    migration character varying(255) NOT NULL,
+    batch integer NOT NULL
+);
+
+
+ALTER TABLE public.migrations OWNER TO dev;
+
+--
+-- Name: migrations_id_seq; Type: SEQUENCE; Schema: public; Owner: dev
+--
+
+CREATE SEQUENCE public.migrations_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.migrations_id_seq OWNER TO dev;
+
+--
+-- Name: migrations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: dev
+--
+
+ALTER SEQUENCE public.migrations_id_seq OWNED BY public.migrations.id;
+
+
+--
+-- Name: sessions; Type: TABLE; Schema: public; Owner: dev
+--
+
+CREATE TABLE public.sessions (
+    id character varying(255) NOT NULL,
+    user_id bigint,
+    ip_address character varying(45),
+    user_agent text,
+    payload text NOT NULL,
+    last_activity integer NOT NULL
+);
+
+
+ALTER TABLE public.sessions OWNER TO dev;
+
+--
+-- Name: migrations id; Type: DEFAULT; Schema: public; Owner: dev
+--
+
+ALTER TABLE ONLY public.migrations ALTER COLUMN id SET DEFAULT nextval('public.migrations_id_seq'::regclass);
+
+
+--
 -- Data for Name: ab_testdata; Type: TABLE DATA; Schema: public; Owner: dev
 --
 
@@ -57,6 +140,31 @@ COPY public.ab_testdata (id, ab_testname) FROM stdin;
 1	Fotokamera
 2	Blitzlicht
 \.
+
+
+--
+-- Data for Name: migrations; Type: TABLE DATA; Schema: public; Owner: dev
+--
+
+COPY public.migrations (id, migration, batch) FROM stdin;
+1	2024_04_09_084832_create_sessions_table	1
+\.
+
+
+--
+-- Data for Name: sessions; Type: TABLE DATA; Schema: public; Owner: dev
+--
+
+COPY public.sessions (id, user_id, ip_address, user_agent, payload, last_activity) FROM stdin;
+q2PlwOzYZw7FCjCsZp5qmtyHY7Ij5KBxFVfdI3Wm	\N	127.0.0.1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0	YTo2OntzOjY6Il90b2tlbiI7czo0MDoiTnZBTWZsSWtDa1BZekFHV05xaU9sV1FiZGM5Umc4S2M2dWJJU2dzeCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzA6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC90ZXN0ZGF0YSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6MTA6ImFiYWxvX3VzZXIiO3M6NzoidmlzaXRvciI7czoxMDoiYWJhbG9fbWFpbCI7czoyNToidmlzaXRvckBhYmFsby5leGFtcGxlLmNvbSI7czoxMDoiYWJhbG9fdGltZSI7aToxNzEyNjUyNjA4O30=	1712654432
+\.
+
+
+--
+-- Name: migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dev
+--
+
+SELECT pg_catalog.setval('public.migrations_id_seq', 1, true);
 
 
 --
@@ -73,6 +181,43 @@ ALTER TABLE ONLY public.ab_testdata
 
 ALTER TABLE ONLY public.ab_testdata
     ADD CONSTRAINT ab_testdata_pk PRIMARY KEY (id);
+
+
+--
+-- Name: migrations migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: dev
+--
+
+ALTER TABLE ONLY public.migrations
+    ADD CONSTRAINT migrations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: dev
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sessions_last_activity_index; Type: INDEX; Schema: public; Owner: dev
+--
+
+CREATE INDEX sessions_last_activity_index ON public.sessions USING btree (last_activity);
+
+
+--
+-- Name: sessions_user_id_index; Type: INDEX; Schema: public; Owner: dev
+--
+
+CREATE INDEX sessions_user_id_index ON public.sessions USING btree (user_id);
+
+
+--
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: dev
+--
+
+REVOKE USAGE ON SCHEMA public FROM PUBLIC;
 
 
 --
