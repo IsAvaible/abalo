@@ -22,8 +22,7 @@ return new class extends Migration
             $table->unsignedBigInteger("ab_article_id")->nullable(false);
             $table->foreign('ab_article_id')->references('id')->on('ab_article');
 
-            // Variable that uses logic (controller later on) to concatenate both values
-            $table->unsignedBigInteger("ab_UNIQUE_article_AND_category")->nullable(false)->unique();
+            $table->unique(['ab_article_id', 'ab_articlecategory_id']);
         });
     }
 

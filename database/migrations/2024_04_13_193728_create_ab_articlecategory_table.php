@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string("ab_name", 100)->nullable(false)->unique();
             $table->string("ab_description", 1000)->nullable(true); // "nullable" is implied by default, but helps w/ readability
             // $table->integer("ab_parent")->nullable(true);
-            $table->unsignedBigInteger('ab_parent')->nullable(true);
+            $table->unsignedBigInteger('ab_parent')->nullable();
             $table->foreign('ab_parent')->references('id')->on('ab_articlecategory');
         });
     }
