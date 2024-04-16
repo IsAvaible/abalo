@@ -13,4 +13,9 @@ Route::get('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->n
 Route::get('/isloggedin', [App\Http\Controllers\AuthController::class, 'isloggedin'])->name('haslogin');
 
 // Yours
-Route::get('/testdata', [App\Http\Controllers\AbTestDataController::class, 'printTestData']);
+Route::get('/articles/', [App\Http\Controllers\ArticleController::class, 'getArticle'])->name('articles');
+
+    /*
+Route::get('/articles/', [App\Http\Controllers\ArticleController::class, 'get()'])->name('overview');
+Route::get('/articles/{article}', [App\Http\Controllers\ArticleController::class, 'get'])->name('articles.get');
+*/
