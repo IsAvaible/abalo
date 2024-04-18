@@ -12,7 +12,7 @@ It partially implements a webshop where users can view products, add them to the
   - GitHub: https://github.com/IsAvaible
 #### Dennis Wolff
   - Student number: 3510869
-  - Email: [dennis.wolff@alumni.fh-aachen.de](mailto:dennis.wolff@alumni.fh-aachen.de)
+  - Email: [dennis.costa@alumni.fh-aachen.de](mailto:dennis.costa@alumni.fh-aachen.de)
   - GitLab: https://git.fh-aachen.de/dc9239s
 
 ## Installation
