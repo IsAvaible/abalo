@@ -31,6 +31,6 @@ class AuthController extends Controller
             $r["auth"] = "true";
         }
         else $r["auth"]="false";
-        return response()->json($r);
+        return response()->json($r); // return response as json object
     }
 }
