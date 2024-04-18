@@ -1,68 +1,37 @@
-<?php
-	// Variables --------------------------------------------------
-
-	// Globals and constants
-
-
-	// Formdata
-	/*
-	if ($_SERVER["REQUEST_METHOD"] == "POST")
-	{
-	    $userInput = $_POST["username"]
-	}
-	*/
-
-
-	// Arrays
-
-
-	// Database ---------------------------------------------------------
-	// Setup
-	/*
-	$link = mysqli_connect("localhost",             // Database Host
-	                       "root",                  // Username for Login
-	                       "3698",                  // Password
-	                       "emensawerbeseite"       // Which Database/Scheme you want to access
-
-	);
-	if (!$link)
-	{
-		echo "Verbindung fehlgeschlagen: ", mysqli_connect_error();
-		exit();
-	}
-	*/
-
-	// SQL
-
-
-	// Logic (PHP) -----------------------------------------------------
-
-	/*
-		mysqli_close($link);
-	*/
-?>
-
-<!-- Webpage .................................................................................................................................................... -->
-
-<!DOCTYPE html >
+<!DOCTYPE html>
 <html lang="de">
 <head>
-	<meta charset="UTF-8">
-	<title>$Title$</title>
-	<style>
-        /* CSS */
-
-
-        /* CSS */
-	</style>
+    <meta charset="UTF-8">
+    <title>$Overview$</title>
 </head>
 <body>
-	<!-- HTML -->
+    <!-- HTML -->
+    <table>
+        @foreach ($data as $article)
+            <tr>
+                <td>
+                    {{$article['id']}}
+                </td>
+                <td>
+                    {{$article['ab_name']}}
+                </td>
+                <td>
+                    {{$article['ab_price']}}
+                </td>
+                <td>
+                    {{$article['ab_description']}}
+                </td>
+                <td>
+                    {{$article['ab_creator_id']}}
+                </td>
+                <td>
+                    {{$article['ab_createdate']}}
+                </td>
 
+            </tr>
 
-	<!-- HTML -->
-	<footer id="Copyright">
-		&copy Wolff & Mattele &nbsp; | &nbsp; <a href="">Impressum</a>
-	</footer>
+        @endforeach
+    </table>
+    <!-- HTML -->
 </body>
 </html>
