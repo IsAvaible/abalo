@@ -32,5 +32,5 @@ class Article extends Model
 
     protected $table = 'ab_article';
     protected $primaryKey = 'id';
-
+    public $timestamps = false;
 }

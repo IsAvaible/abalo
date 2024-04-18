@@ -3,6 +3,7 @@
 // app/Produkt.php
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|AbTestData newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|AbTestData newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|AbTestData query()
- * @mixin \Eloquent
+ * @mixin Builder
  */
 class AbTestData extends Model
 {
@@ -20,4 +21,5 @@ class AbTestData extends Model
 
     // Name of primary key:
     protected $primaryKey = 'id';
+    public $timestamps = false;
 }

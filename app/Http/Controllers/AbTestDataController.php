@@ -1,20 +1,15 @@
 <?php
 
-    namespace App\Http\Controllers;
+namespace App\Http\Controllers;
 
-    use App\Models\AbTestData;
-    use Illuminate\Http\Request; // for parameter: (Request $rd)
-    class AbTestDataController extends Controller
+use App\Models\AbTestData;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Routing\Controller;
+
+class AbTestDataController extends Controller
+{
+    public function index(): Collection // Stores all entries within ab_testdata table to variable
     {
-        public function index() // Stores all entries within ab_testdata table to variable
-        {
-            return AbTestData::all();
-        }
-
-        public function printTestData()
-        {
-            $ab_testdata = $this->index();
-            return $ab_testdata;
-        }
+        return AbTestData::all();
     }
-?>
+}

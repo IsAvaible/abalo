@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <title>$Overview$</title>
 </head>
 <body>
-    <!-- HTML -->
     <table>
         @foreach ($data as $article)
             <tr>
@@ -27,11 +26,12 @@
                 <td>
                     {{$article['ab_createdate']}}
                 </td>
-
+                <td>
+                    <img src='{{$images[$article['id']]}}' alt='image' height='70px'>
+                </td>
             </tr>
 
         @endforeach
     </table>
-    <!-- HTML -->
 </body>
 </html>

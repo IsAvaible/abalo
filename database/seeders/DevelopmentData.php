@@ -1,77 +1,71 @@
 <?php
 
-    namespace Database\Seeders;
+namespace Database\Seeders;
 
-    use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-    use Illuminate\Database\Seeder;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
-// Added: ------------------------------------------------
-    use Illuminate\Support\Facades\DB;
+// interact w/ DB w/o Query Builder or Eloquent ORM
+use Illuminate\Support\Facades\Hash;
 
-    // interact w/ DB w/o Query Builder or Eloquent ORM
-    use Illuminate\Support\Facades\Hash;
-
-    // methods for hashing and checking passwords
-    use Illuminate\Support\Str;
-
-    // string manipulation methods
-
-    class DevelopmentData extends Seeder
+class DevelopmentData extends Seeder
+{
+    /**
+     * Seeds the table with data from a csv file
+     * @param string $table The table to seed
+     * @param string $filePath The file path to the data
+     */
+    private function seedTable($table, $filePath): void
     {
-        /**
-         * Run the database seeders.
-         */
-        private function insertData($table, $data)
-        {
-            $dataMap    = array_map(function ($value)
-                          {
-                              return str_getcsv($value, ";");
-                          },
-                          file($data));   // contains all of $data as a map
+        // Read data from file
+        $dataMap = array_map(function ($value) {
+            return str_getcsv($value, ";");
+        },
+            file($filePath));
 
-            $attributes = array_shift($dataMap);                // copies first data row and deletes it from $dataMap
-                                                                       // first row contains column/attribute names
-            foreach ($dataMap as $row)
-            {
-                $dbData = [];
-                foreach ($attributes as $attribute => $name)
-                {
-                    // Cleaning database input data
-
-                    if (str_contains($name, 'price')/* $name == 'ab_price' */)
-                    {
-                        $row[$attribute] = str_replace('.', '', $row[$attribute]);
-                    }
-                    if ($row[$attribute] == 'NULL' || $row[$attribute] == 'null')
-                    {
-                        $row[$attribute] = NULL;
-                    }
-                    if (str_contains($name, 'password'))
-                    {
-                        $row[$attribute] = Hash::make($row[$attribute]);
-                    }
-
-                    // map column name to column value in the row
-                    $dbData[$name] = $row[$attribute]; // maybe sub $attribute to $i or $index for clarity
+        // Copy first row of data to $attributes and remove it from $dataMap
+        //  The first row contains the column/attribute names
+        $attributes = array_shift($dataMap);
+        // Loop through the data
+        foreach ($dataMap as $row) {
+            $dbData = [];
+            // Loop through the attributes
+            foreach ($attributes as $attribute => $name) {
+                // Clean up data
+                if ($name == 'ab_price') {
+                    // Remove all dots from the price (they are used as thousand separators)
+                    $row[$attribute] = str_replace('.', '', $row[$attribute]);
+                }
+                if ($row[$attribute] == 'NULL' || $row[$attribute] == 'null') {
+                    // Convert 'NULL' or 'null' to NULL
+                    $row[$attribute] = NULL;
+                }
+                if (str_contains($name, 'password')) {
+                    // Hash passwords
+                    $row[$attribute] = Hash::make($row[$attribute]);
                 }
 
-                // Insert data into the database table
-                DB::table($table)->insert($dbData);
+                // Map column name to column value in the row
+                $dbData[$name] = $row[$attribute];
             }
-        }
 
-        public function run(): void
-        {
-            // Table, data file (path)
-            $data = [
-                "ab_user" => __DIR__ . '/data/user.csv', // __DIR__ is current file's directory
-                "ab_article" => __DIR__ . '/data/articles.csv',
-                "ab_articlecategory" => __DIR__ . '/data/articlecategory.csv'
-            ];
-
-            foreach ($data as $table => $filePath)
-            {
-                $this->insertData($table, $filePath);
-            }
+            // Insert data into the database table
+            DB::table($table)->insert($dbData);
         }
     }
+
+    public function run(): void
+    {
+        // Define the tables and their data files
+        $tables = [
+            "ab_user" => __DIR__ . '/data/user.csv', // __DIR__ is current file's directory
+            "ab_article" => __DIR__ . '/data/articles.csv',
+            "ab_articlecategory" => __DIR__ . '/data/articlecategory.csv'
+        ];
+
+
+        foreach ($tables as $table => $filePath) {
+            $this->seedTable($table, $filePath);
+        }
+    }
+}

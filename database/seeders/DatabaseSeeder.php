@@ -13,7 +13,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-        $this->call(DevelopmentData::class); // added by Dennis
+        $this->call(AbTestdataSeeder::class);
+        $this->call(DevelopmentData::class);
+        // The MassUserSeeder is commented out because it creates 10,000 users which were only needed for testing purposes.
+        // To use it, uncomment the line below and comment out the DevelopmentData::class line above.
+        // $this->call(MassUserSeeder::class);
     }
 }
