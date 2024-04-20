@@ -35,7 +35,7 @@ The branching workflow consists of the following steps:
 The branching naming convention is as follows:
 - `group`: `group/<group-name>` (e.g. `group/M1-A2+A3`)
 - `task`: `task/<task-name>` (e.g. `task/M1-A2`)
-    - `task-developer`: `task/<task-name>/<developer-name>` (e.g. `task/M1-A2/simon`)
+    - `task-developer`: `task/<task-name>@<developer-name>` (e.g. `task/M1-A2@simon`)
 - `hotfix`: `hotfix/<hotfix-name>` (e.g. `hotfix/M1-A2-fix`)
 
 ### References
