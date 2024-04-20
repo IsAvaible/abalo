@@ -29,4 +29,5 @@ php artisan serve
 
 ## Documentation
 The documentation can be found in the `dossier` directory. It contains the following files:
+- [BRANCHING.md](dossier/BRANCHING.md): Contains the branching strategy used in the project
 - [M1.md](dossier/M1.md): Contains the documentation for the first milestone
