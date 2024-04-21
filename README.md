@@ -22,8 +22,9 @@ It partially implements a webshop where users can view products, add them to the
 php composer install
 npm install
 ```
-3. Run the following command to start the server:
+3. Run the following two commands in parallel to serve the frontend and backend:
 ```bash
+npm run dev &
 php artisan serve
 ```
 
