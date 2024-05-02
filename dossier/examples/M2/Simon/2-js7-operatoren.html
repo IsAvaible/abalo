@@ -1,0 +1,51 @@
+<script>
+    "use strict";
+
+    console.log("%cComparison Operators", "font-weight: bold;");
+    console.log("1 < 2 = ", 1 < 2);
+    console.log("1 > 2 = ", 1 > 2);
+    console.log("1 <= 2 = ", 1 <= 2);
+    console.log("1 >= 2 = ", 1 >= 2);
+    console.log("1 == \"1\" = ", 1 == "1");
+    console.log("1 != \"1\" = ", 1 != "1");
+    console.log("1 === 1 = ", 1 === 1);
+    console.log("1 !== 1 = ", 1 !== 1);
+
+    console.log("%cLogical Operators", "font-weight: bold;");
+    console.log("true && false = ", true && false);
+    console.log("true || false = ", true || false);
+    console.log("!true = ", !true);
+
+    console.log("%cArithmetic Operators", "font-weight: bold;");
+    console.log("1 + 2 = ", 1 + 2);
+    console.log("1 - 2 = ", 1 - 2);
+    console.log("1 * 2 = ", 1 * 2);
+    console.log("1 / 2 = ", 1 / 2);
+    console.log("1 % 2 = ", 1 % 2);
+
+    console.log("%cAssignment Operators", "font-weight: bold;");
+    let a = 1;
+    console.log("a = 1; a += 2; a = ", a += 2);
+    console.log("a = 1; a -= 2; a = ", a -= 2);
+
+    console.log("%cIncrement and Decrement Operators", "font-weight: bold;");
+    let b = 1;
+    console.log("b = 1; b++; b = ", b++);
+    console.log("b = 1; ++b; b = ", ++b);
+    console.log("b = 1; b--; b = ", b--);
+    console.log("b = 1; --b; b = ", --b);
+
+    console.log("%cTernary Operator", "font-weight: bold;");
+    let c = 1;
+    console.log("c = 1; c < 2 ? \"c is less than 2\" : \"c is greater than or equal to 2\" = ", c < 2 ? "c is less than 2" : "c is greater than or equal to 2");
+
+    console.log("%cTypeof Operator", "font-weight: bold;");
+    console.log("typeof 1 = ", typeof 1);
+
+    console.log("%cInstanceof Operator", "font-weight: bold;");
+    console.log("1 instanceof Number = ", 1 instanceof Number);
+
+    console.log("%cDelete Operator", "font-weight: bold;");
+    let d = {a: 1, b: 2};
+    console.log("d = {a: 1, b: 2}; delete d.a; d = ", delete d.a, d);
+</script>
