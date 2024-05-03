@@ -4,9 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 // interact w/ DB w/o Query Builder or Eloquent ORM
-use Illuminate\Support\Facades\Hash;
 
 class DevelopmentData extends Seeder
 {
@@ -66,6 +66,9 @@ class DevelopmentData extends Seeder
 
         foreach ($tables as $table => $filePath) {
             $this->seedTable($table, $filePath);
+            // Set the auto increment to the highest id + 1 as it gets out of sync when seeding
+            $maxId = DB::table($table)->max('id');
+            DB::statement("ALTER SEQUENCE {$table}_id_seq RESTART WITH " . ($maxId + 1));
         }
     }
 }
