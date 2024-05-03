@@ -19,14 +19,15 @@ class ArticleController extends Controller
         // Get the search keyword
         $keyword = $request->query('search');
         // Find the articles (case-insensitive)
-        $data = Article::whereRaw('LOWER(ab_name) LIKE ?', '%' . $keyword . '%')->get();
+        $data = Article::whereRaw('LOWER(ab_name) LIKE ?', '%' . strtolower($keyword) . '%')->get();
         // Find the images
         $images = [];
         foreach ($data as $article) {
             $images[$article['id']] = ArticleController::fingImage($article['id']);
         }
         // Return the view
-        return view('articles.overview', ['data' => $data, 'images' => $images]);
+        // TODO: only first nine until image compression is implemented
+        return view('articles.overview', ['data' => $data->take(9), 'images' => $images, 'search' => $keyword]);
     }
 
     /**
