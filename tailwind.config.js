@@ -10,9 +10,13 @@ export default {
         extend: {
             transitionProperty: {
                 'height': 'height',
+                'width': 'width',
+                'padding': 'padding',
             },
         }
     },
-    plugins: [],
+    plugins: [
+        require('@tailwindcss/container-queries'),
+    ],
 }
 

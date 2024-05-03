@@ -35,22 +35,22 @@ categories.forEach((category) => {
 imageInput.setAttribute('accept', 'image/*');
 
 // Repopulate the form fields with the previously entered values
-(nameInput as HTMLInputElement).value = document.querySelector('meta[name="old-name"]').getAttribute('content') || '';
-(descriptionInput as HTMLInputElement).value = document.querySelector('meta[name="old-description"]').getAttribute('content') || '';
-(priceInput as HTMLInputElement).value = document.querySelector('meta[name="old-price"]').getAttribute('content') || '';
-(categoryInput as HTMLSelectElement).selectedIndex = categories.indexOf(document.querySelector('meta[name="old-category"]').getAttribute('content')) || 0;
+(nameInput as HTMLInputElement).value = document.querySelector('meta[name="old-name"]')!.getAttribute('content') || '';
+(descriptionInput as HTMLInputElement).value = document.querySelector('meta[name="old-description"]')!.getAttribute('content') || '';
+(priceInput as HTMLInputElement).value = document.querySelector('meta[name="old-price"]')!.getAttribute('content') || '';
+(categoryInput as HTMLSelectElement).selectedIndex = categories.indexOf(document.querySelector('meta[name="old-category"]')!.getAttribute('content')!) || 0;
 
 // Add the csrf token
 const csrfToken = document.createElement('input');
 csrfToken.type = 'hidden';
 csrfToken.name = '_token';
-csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+csrfToken.value = document.querySelector('meta[name="csrf-token"]')!.getAttribute('content')!;
 
 // Create the submit button
 const submitButton = document.createElement('button');
 submitButton.type = 'submit';
 submitButton.textContent = 'Submit';
-submitButton.classList.add('col-span-2', 'py-3', 'rounded-md', 'bg-blue-500', 'hover:bg-blue-600', 'text-white', 'font-semibold', 'transition-colors', 'duration-200', 'ease-in-out', 'shadow-md', 'dark:bg-blue-400', 'dark:hover:bg-blue-500', 'dark:shadow-none');
+submitButton.classList.add('col-span-2', 'py-3', 'rounded-md', 'bg-slate-800', 'hover:bg-slate-900', 'text-white', 'font-semibold', 'transition-colors', 'duration-200', 'ease-in-out', 'shadow-md', 'dark:bg-blue-400', 'dark:hover:bg-blue-500', 'dark:shadow-none');
 
 form.append(nameLabel, nameInput, descriptionLabel, descriptionInput, priceLabel, priceInput, categoryLabel, categoryInput, imageLabel, imageInput, csrfToken, submitButton);
 
