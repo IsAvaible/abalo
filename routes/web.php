@@ -15,3 +15,5 @@ Route::get('/isloggedin', [App\Http\Controllers\AuthController::class, 'islogged
 Route::get('/testdata', [App\Http\Controllers\AbTestdataController::class, 'index'])->name('testdata');
 // ArticleController
 Route::get('/articles/', [App\Http\Controllers\ArticleController::class, 'index'])->name('articles');
+Route::get('/articles/add', [App\Http\Controllers\ArticleController::class, 'add'])->name('articles.add');
+Route::post('/articles', [App\Http\Controllers\ArticleController::class, 'store'])->name('storearticle');

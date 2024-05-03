@@ -1,0 +1,47 @@
+<script>
+    "use strict";
+
+    const arr = ["erstes", "zweites", 3, 4];
+
+    // a) Output the array using three different methods.
+    console.log("%carr\n", "font-weight: bold");
+    console.log(arr);
+
+    console.log("%cfor (let i = 0; i < arr.length; i++) { ... }", "font-weight: bold");
+    for (let i = 0; i < arr.length; i++) {
+        console.log("arr[" + i + "] = ", arr[i]);
+    }
+
+    console.log("%carr.forEach((element, index) => { ... })", "font-weight: bold");
+    arr.forEach((element, index) => {
+        console.log("arr[" + index + "] = ", element);
+    });
+
+    // b) Modify the array
+    console.log("%carr.push(\"fünftes\");", "font-weight: bold");
+    arr.push("fünftes");
+    console.log(arr);
+
+    console.log("%carr[1] = 2;", "font-weight: bold");
+    arr[1] = 2;
+    console.log(arr);
+
+    // c) Use array methods
+    console.log("%carr.length;", "font-weight: bold");
+    console.log(arr.length);
+
+    console.log("%carr.sort();", "font-weight: bold");
+    console.log(arr.sort());
+
+    console.log("%carr.find((element) => element === 2);", "font-weight: bold");
+    console.log(arr.find((element) => element === 2));
+
+    console.log("%carr.filter((element) => element === 2);", "font-weight: bold");
+    console.log(arr.filter((element) => element === 2));
+
+    console.log("%carr.map((element) => element * 2);", "font-weight: bold");
+    console.log(arr.map((element) => element * 2));
+
+    console.log("%carr.slice(1, 3);", "font-weight: bold");
+    console.log(arr.slice(1, 3));
+</script>

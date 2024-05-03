@@ -10,6 +10,65 @@ use Illuminate\View\View;
 class ArticleController extends Controller
 {
     /**
+     * Display a listing of the articles filtered by keyword.
+     * @param Request $request The request
+     * @return View The view
+     */
+    public function index(Request $request): View
+    {
+        // Get the search keyword
+        $keyword = $request->query('search');
+        // Find the articles (case-insensitive)
+        $data = Article::whereRaw('LOWER(ab_name) LIKE ?', '%' . strtolower($keyword) . '%')->get();
+        // Find the images
+        $images = [];
+        foreach ($data as $article) {
+            $images[$article['id']] = ArticleController::fingImage($article['id']);
+        }
+        // Return the view
+        // TODO: only first nine until image compression is implemented
+        return view('articles.overview', ['data' => $data->take(9), 'images' => $images, 'search' => $keyword]);
+    }
+
+    /**
+     * Show the form for creating a new article.
+     */
+    public function add(): View
+    {
+        return view('articles.add');
+    }
+
+    /**
+     * Store a newly created article in storage.
+     */
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        // Validate the request
+        $request->validate([
+            'name' => 'required',
+            'description' => 'required',
+            'price' => ['required', 'numeric', 'min:0'],
+            'image' => ['required', 'image', 'max:2048'],
+        ]);
+
+        // Create a new article
+        $article = new Article();
+        $article->ab_name = $request->input('name');
+        $article->ab_description = $request->input('description');
+        $article->ab_price = $request->input('price');
+        $article->ab_creator_id = 1; // $request->session()->get('abalo_user');
+        $article->save();
+
+        // Store the image
+        $image = $request->file('image');
+        $imageName = $article->id . '.' . $image->extension();
+        $image->move(public_path('images'), $imageName);
+
+        // Redirect to the articles overview
+        return redirect()->route('articles')->with('success', 'Article created successfully.');
+    }
+
+    /**
      * Find article image by ID
      * @param int $articleID The article ID
      * @return string|null The image path or NULL if not found
@@ -31,25 +90,5 @@ class ArticleController extends Controller
             }
         }
         return NULL;
-    }
-
-    /**
-     * Display a listing of the articles filtered by keyword.
-     * @param Request $request The request
-     * @return View The view
-     */
-    public function index(Request $request): View
-    {
-        // Get the search keyword
-        $keyword = $request->query('search');
-        // Find the articles (case-insensitive)
-        $data = Article::whereRaw('LOWER(ab_name) LIKE ?', '%' . $keyword . '%')->get();
-        // Find the images
-        $images = [];
-        foreach ($data as $article) {
-            $images[$article['id']] = ArticleController::fingImage($article['id']);
-        }
-        // Return the view
-        return view('articles.overview', ['data' => $data, 'images' => $images]);
     }
 }
