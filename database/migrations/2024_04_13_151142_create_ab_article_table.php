@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('ab_creator_id')->nullable(false);
             $table->foreign('ab_creator_id')->references('id')->on('ab_user');
             // ----------------------
-            $table->timestamp('ab_createdate')->nullable(false);
+            $table->timestamp('ab_createdate')->nullable(false)->useCurrent();
         });
     }
 
