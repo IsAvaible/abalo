@@ -1,0 +1,44 @@
+<div id="container">
+    <div id="message"></div>
+</div>
+
+<script>
+"use strict";
+
+// Request the file "message.json" every 3 seconds and display the content in the div with the id "message"
+setInterval(function() {
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", "message.json", true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                let message = JSON.parse(xhr.responseText);
+                document.getElementById("message").innerText = message.content;
+            } else {
+                document.getElementById("message").innerText = `An error occurred. Status: ${xhr.status}`;
+            }
+        }
+    };
+    xhr.send();
+}, 3000);
+</script>
+
+<style>
+    #container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
+
+    #message {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        width: 15rem;
+        height: 1rem;
+        text-align: center;
+        border-radius: 0.5rem;
+    }
+</style>
