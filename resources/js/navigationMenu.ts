@@ -13,10 +13,8 @@ interface NavigationMenuEntry           // Interface: defines expected structure
  * @returns the navigation menu
  */
 
-class NavigationMenu
-{
-    constructor(entries: NavigationMenuEntry[])
-    {
+class NavigationMenu {
+    constructor(entries: NavigationMenuEntry[]) {
         // @ts-ignore
         this.entries = entries;
     }
@@ -27,8 +25,7 @@ class NavigationMenu
      * @param level the nesting level of the entry
      * @returns the created menu entry
      */
-    createMenuEntry(entry: NavigationMenuEntry, level: number = 0): HTMLElement
-    {
+    createMenuEntry(entry: NavigationMenuEntry, level: number = 0): HTMLElement {
         const li = document.createElement('li');
         li.classList.add('flex', 'flex-col', 'justify-between'); // Add Tailwind classes
         if (level === 0) {
@@ -70,8 +67,7 @@ class NavigationMenu
         return li;
     }
 
-    createNavigationMenu(): HTMLElement
-    {
+    createNavigationMenu(): HTMLElement {
         console.log("Hello from NEW navigationMenu.ts");
 
         // Create the navigation element
@@ -111,7 +107,40 @@ class NavigationMenu
 const entries: NavigationMenuEntry[] =
     [
         {label: "Home", url: "/", children: []},
-        {label: "Kategorien", url: "/categories", children: []},
+        //{label: "Kategorien", url: "/categories", children: []},
+        {
+            label: "Kategorien", url: "/categories", children: [
+                {label: "Electronik", url: "/categories/electronics", children: []},
+                {label: "Kleidung", url: "/categories/clothing", children: []},
+                {label: "Bücher", url: "/categories/books", children: [
+                        {label: "Fiktion", url: "/categories/books/fiction", children: []},
+                        {label: "Sachbücher", url: "/categories/books/nonfiction", children: []},
+                    ]},
+                {label: "Home", url: "/categories/home", children: [
+                        {label: "Zimmer", url: "/categories/home/rooms", children: [
+                                {label: "Wohnzimmer", url: "/categories/home/rooms/livingroom", children: []},
+                                {label: "Schlafzimmer", url: "/categories/", children: []},
+                            ]},
+                        {label: "Garden", url: "/categories/home/Garden", children: []},
+                        {label: "DIY", url: "/categories/home/DIY", children: []},
+                    ]},
+                {label: "Toys", url: "/categories/toys", children: []},
+                {label: "Health", url: "/categories/health", children: [
+                        {label: "Beauty", url: "/categories/health/beauty", children: []},
+                        {label: "Fitness", url: "/categories/health/fitness", children: []},
+                    ]},
+                {label: "Sports", url: "/categories/sports", children: []},
+                {label: "Outdoors", url: "/categories/outdoors", children: []},
+                {label: "Automotive", url: "/categories/automotive", children: []},
+                {
+                    label: "Media", url: "/categories/media", children: [
+                        {label: "Music", url: "/categories/media/music", children: []},
+                        {label: "Movies", url: "/categories/media/movies", children: []},
+                        {label: "Games", url: "/categories/media/games", children: []},
+                    ]
+                },
+            ]
+        },
         {label: "Verkaufen", url: "/sell", children: []},
         {
             label: "Unternehmen", url: "/company", children: [
