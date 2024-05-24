@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>M2-A6.7</title>
+</head>
+<body>
+    <script>
+        "use strict";
+
+        // Parent class "User"
+        class User
+        {
+            constructor(firstname, lastname)
+            {
+                this.firstname = firstname;
+                this.lastname = lastname;
+            }
+
+            // Getters
+            getFirst()
+            {
+                return this.firstname;
+            }
+            getLast()
+            {
+                return this.lastname;
+            }
+
+            // Setters
+            setFirst(firstname)
+            {
+                this.firstname = firstname;
+            }
+            setLast(lastname)
+            {
+                this.lastname = lastname;
+            }
+        }
+
+        // Child class "Buyer"
+        class Buyer extends User
+        {
+            constructor(firstname, lastname, lastBuy)
+            {
+                super(firstname, lastname); // Call the parent class constructor
+                this.lastBuy = lastBuy;
+            }
+
+            // Getter
+            getLastBuy() {
+                return this.lastBuy;
+            }
+
+            // Setter
+            setLastBuy(lastBuy)
+            {
+                this.lastBuy = lastBuy;
+            }
+        }
+
+        // "Main"
+        let person = new Buyer("Mr", "Meeseeks", "2024-05-20");
+
+        console.log("Name: " + person.firstname);
+        console.log("Surname: " + person.getLast());
+        console.log("Last Buy: " + person["lastBuy"]);
+
+    </script>
+</body>
+</html>
