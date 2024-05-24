@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>M2-A6.2</title>
+</head>
+<body>
+    <script>
+        // https://www.w3schools.com/js/js_htmldom_document.asp
+        "use strict";
+        console.log(document.title);
+        console.log("height = " + document.documentElement.clientHeight + ", width: " + document.documentElement.clientWidth);
+        console.log(document.URL);
+        document.cookie = "name=Donkey;location=Shrek's Swamp";
+
+        let cookies = document.cookie.split(';'); // cookies = ["name=Donkey", "location=Shrek's Swamp"]
+        /* console.log(cookies); */
+        cookies.forEach(function(cookie)
+        {
+            let cookieData = cookie.split('=');
+            /* console.log("cookieData:", cookieData); */
+            console.log(cookieData[0].trim() + ' = ' + cookieData[1].trim());
+        })
+    </script>
+</body>
+</html>
