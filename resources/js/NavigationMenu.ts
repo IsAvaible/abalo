@@ -14,8 +14,9 @@ interface NavigationMenuEntry           // Interface: defines expected structure
  */
 
 class NavigationMenu {
+    entries: NavigationMenuEntry[];
+
     constructor(entries: NavigationMenuEntry[]) {
-        // @ts-ignore
         this.entries = entries;
     }
 
@@ -68,8 +69,6 @@ class NavigationMenu {
     }
 
     createNavigationMenu(): HTMLElement {
-        console.log("Hello from NEW navigationMenu.ts");
-
         // Create the navigation element
         const nav = document.createElement('nav');
         nav.appendChild(document.createElement('ul'));
