@@ -1,14 +1,5 @@
-/**
- * Interface for the article object
- */
-interface Article {
-    id: number;
-    ab_name: string;
-    ab_price: number;
-    ab_description: string;
-    ab_creator_id: number;
-    ab_createdate: Date;
-}
+import {formatNumberToEuro} from "../../util/formatNumberToEuro";
+import {Article} from "./Article";
 
 // Create the shopping cart button
 const cartButton = document.createElement('button');
@@ -62,15 +53,11 @@ checkoutButton.className = 'bg-slate-800 hover:bg-slate-900 text-white font-bold
 checkoutButton.title = 'Checkout';
 table.appendChild(checkoutButton);
 
-// Append the dialog and button to the body
-document.scripts[document.scripts.length - 1].insertAdjacentElement('afterend', dialog);
-document.body.appendChild(cartButton);
-
 // Array to store the articles in the cart
 const articles: Article[] = []
 
 // Function to add an article to the cart
-function addToCart(article: Article, caller: HTMLButtonElement) {
+export function addToCart(article: Article, caller: HTMLButtonElement) {
     // Check if the item is already in the cart
     if (articles.find((a) => a.id === article.id)) {
         return;
@@ -150,13 +137,9 @@ function addToCart(article: Article, caller: HTMLButtonElement) {
     caller.disabled = true;
 }
 
-// Make the function available in the global scope
-window.addToCart = addToCart;
-
-/**
- * Function to format a number to Euro format
- * @param number The number to format
- */
-function formatNumberToEuro(number: number) {
-    return new Intl.NumberFormat('de-DE').format(Number(number.toFixed(2))) + ' €';
-}
+// Append the dialog and button to the body
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('shopping-cart')!.innerHTML = '';
+    document.getElementById('shopping-cart')!.appendChild(dialog);
+    document.body.appendChild(cartButton);
+});

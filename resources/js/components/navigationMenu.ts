@@ -14,8 +14,9 @@ interface NavigationMenuEntry           // Interface: defines expected structure
  */
 
 class NavigationMenu {
+    entries: NavigationMenuEntry[];
+
     constructor(entries: NavigationMenuEntry[]) {
-        // @ts-ignore
         this.entries = entries;
     }
 
