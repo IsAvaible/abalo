@@ -12,7 +12,6 @@ interface NavigationMenuEntry {
  * @returns the navigation menu
  */
 export function createNavigationMenu(): HTMLElement {
-    console.log("Hello from navigationMenu.ts");
     // Create the navigation element
     const nav = document.createElement('nav');
     nav.appendChild(document.createElement('ul'));
@@ -31,8 +30,8 @@ export function createNavigationMenu(): HTMLElement {
             },
         ];
     // Create and append the menu entries
-    entries.forEach(entry => nav.firstChild.appendChild(createMenuEntry(entry)));
-    nav.firstElementChild.lastElementChild.classList.remove('border-b');
+    entries.forEach(entry => nav.firstChild!.appendChild(createMenuEntry(entry)));
+    nav.firstElementChild!.lastElementChild!.classList.remove('border-b');
     return nav;
 }
 
@@ -54,18 +53,21 @@ function createMenuEntry(entry: NavigationMenuEntry, level: number = 0): HTMLEle
     div.classList.add('flex', 'items-stretch');
     const a = document.createElement('a');
     a.href = entry.url;
-    a.classList.add('text-gray-700', 'hover:bg-gray-200', 'py-2', 'px-4', 'grow');
+    a.classList.add('text-slate-700', 'hover:text-black', 'hover:text-shadow-semibold', 'shadow-black', 'py-2', 'px-4', 'grow', 'transition-[colors,text-shadow]');
     a.textContent = entry.label;
     div.appendChild(a)
     li.appendChild(div);
 
     if (entry.children.length > 0) {
         // Add an arrow icon next to the parent menu item
-        const arrow = document.createElement('button');
-        arrow.textContent = '➤'; // Use a simple arrow for demonstration
-        arrow.classList.add('px-2', 'hover:bg-gray-200');
-        arrow.setAttribute('title', 'Toggle sub entries');
-        div.appendChild(arrow);
+        const arrowButton = document.createElement('button');
+        arrowButton.classList.add('p-2', 'group/arrow', 'flex', 'justify-center', 'focus:outline-none');
+        arrowButton.setAttribute('title', 'Toggle sub entries');
+        const arrow = document.createElement('p');
+        arrowButton.appendChild(arrow);
+        arrow.textContent = '﹥'; // Use a simple arrow for demonstration
+        arrow.classList.add('scale-150', 'shadow-black', 'transition-[colors,text-shadow,transform]', 'group-hover/arrow:text-shadow-semibold', 'group-hover/arrow:text-black');
+        div.appendChild(arrowButton);
 
         const ul = document.createElement('ul');
         ul.classList.add('overflow-hidden', 'transition-height');
@@ -74,10 +76,10 @@ function createMenuEntry(entry: NavigationMenuEntry, level: number = 0): HTMLEle
         li.appendChild(ul);
 
         // Toggle sub entries on arrow click
-        arrow.addEventListener('click', () => {
+        arrowButton.addEventListener('click', () => {
             const isHidden = ul.style.height === '0px';
             ul.style.height = isHidden ? `${ul.scrollHeight}px` : '0';
-            arrow.textContent = isHidden ? '⮟':'➤';
+            arrow.classList.toggle('rotate-90');
         });
     }
 
@@ -85,4 +87,6 @@ function createMenuEntry(entry: NavigationMenuEntry, level: number = 0): HTMLEle
 }
 
 // When the script is loaded, insert the navigation menu at the current script tag position
-document.scripts[document.scripts.length - 1].insertAdjacentElement('afterend', createNavigationMenu());
+// document.scripts[document.scripts.length - 1].insertAdjacentElement('afterend', createNavigationMenu());
+// Hardcoded navigation menu position
+document.querySelector("div[role='dialog']")!.appendChild(createNavigationMenu());

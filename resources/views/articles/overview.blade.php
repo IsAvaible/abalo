@@ -13,7 +13,7 @@
         <br>
     @endif
     <div>
-        <div class="grid gap-8 2xl:gap-12 px-8" style="grid-template-columns: 1fr auto minmax(0,1fr)">
+        <div class="grid gap-8 2xl:gap-12 px-8 relative" style="grid-template-columns: 1fr auto minmax(0,1fr)">
             <div class="col-span-full md:col-span-1">
                 <div class="flex-col gap-y-4 w-fit hidden md:flex md:float-right">
                     <div class="flex flex-col gap-y-1">

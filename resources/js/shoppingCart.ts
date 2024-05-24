@@ -20,7 +20,9 @@ cartButton.title = 'Open Shopping Cart';
 
 // Create the shopping cart dialog
 const dialog = document.createElement('div');
-dialog.className = 'max-[1600px]:fixed bottom-20 right-4 bg-white rounded-lg max-[1600px]:shadow-lg p-4 max-[1600px]:pointer-events-none max-[1600px]:opacity-0 max-[1600px]:scale-0 transition-all origin-[calc(100%_-_2rem)_bottom] duration-300 min-w-68';
+dialog.setAttribute('role', 'dialog');
+dialog.className = 'max-[1600px]:fixed bottom-20 right-4 bg-white rounded-lg max-[1600px]:shadow-lg p-4 max-[1600px]:pointer-events-none max-[1600px]:opacity-0 max-[1600px]:scale-0 origin-[calc(100%_-_2rem)_bottom] duration-300 min-w-68 z-50';
+dialog.style.transitionProperty = 'opacity, transform';
 
 /**
  * Function to toggle the visibility of the cart dialog
@@ -62,6 +64,24 @@ checkoutButton.className = 'bg-slate-800 hover:bg-slate-900 text-white font-bold
 checkoutButton.title = 'Checkout';
 table.appendChild(checkoutButton);
 
+// Get the footer element
+let footer: HTMLElement | null = null;
+setTimeout(() => {
+    footer = document.querySelector('footer');
+}, 0);
+
+// Scroll event listener to adjust the position of the cart button and dialog
+window.addEventListener('scroll', () => {
+    const visibleFooterHeight = Math.max(window.innerHeight - footer!.getBoundingClientRect().top, 0);
+    if (visibleFooterHeight > 0) {
+        cartButton.style.bottom = `${visibleFooterHeight + 16}px`;
+        dialog.style.bottom = `${visibleFooterHeight + 80}px`;
+    } else {
+        cartButton.style.bottom = '1rem';
+        dialog.style.bottom = '5rem';
+    }
+});
+
 // Append the dialog and button to the body
 document.scripts[document.scripts.length - 1].insertAdjacentElement('afterend', dialog);
 document.body.appendChild(cartButton);
@@ -78,8 +98,7 @@ function addToCart(article: Article, caller: HTMLButtonElement) {
 
     // If the cart is empty, remove the warning message
     if (articles.length === 0) {
-        dialog.removeChild(noItemWarning);
-        dialog.appendChild(table);
+        dialog.replaceChild(table, noItemWarning)
     }
 
     // Add the article to the cart
@@ -95,8 +114,9 @@ function addToCart(article: Article, caller: HTMLButtonElement) {
     itemPrice.textContent = formatNumberToEuro(article.ab_price);
     itemPrice.classList.add('text-nowrap');
     const itemRemoveButton = document.createElement('button');
-    itemRemoveButton.innerHTML = '<?xml version="1.0" encoding="UTF-8"?><svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor"  stroke-width="1.5"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 1.25C6.06294 1.25 1.25 6.06294 1.25 12C1.25 17.9371 6.06294 22.75 12 22.75C17.9371 22.75 22.75 17.9371 22.75 12C22.75 6.06294 17.9371 1.25 12 1.25ZM9.70164 8.64124C9.40875 8.34835 8.93388 8.34835 8.64098 8.64124C8.34809 8.93414 8.34809 9.40901 8.64098 9.7019L10.9391 12L8.64098 14.2981C8.34809 14.591 8.34809 15.0659 8.64098 15.3588C8.93388 15.6517 9.40875 15.6517 9.70164 15.3588L11.9997 13.0607L14.2978 15.3588C14.5907 15.6517 15.0656 15.6517 15.3585 15.3588C15.6514 15.0659 15.6514 14.591 15.3585 14.2981L13.0604 12L15.3585 9.7019C15.6514 9.40901 15.6514 8.93414 15.3585 8.64124C15.0656 8.34835 14.5907 8.34835 14.2978 8.64124L11.9997 10.9393L9.70164 8.64124Z"></path></svg>';
-    itemRemoveButton.classList.add('text-black', 'hover:text-red-600', 'transition-colors');
+    itemRemoveButton.innerHTML = '<svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor"  stroke-width="1.5"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 1.25C6.06294 1.25 1.25 6.06294 1.25 12C1.25 17.9371 6.06294 22.75 12 22.75C17.9371 22.75 22.75 17.9371 22.75 12C22.75 6.06294 17.9371 1.25 12 1.25ZM9.70164 8.64124C9.40875 8.34835 8.93388 8.34835 8.64098 8.64124C8.34809 8.93414 8.34809 9.40901 8.64098 9.7019L10.9391 12L8.64098 14.2981C8.34809 14.591 8.34809 15.0659 8.64098 15.3588C8.93388 15.6517 9.40875 15.6517 9.70164 15.3588L11.9997 13.0607L14.2978 15.3588C14.5907 15.6517 15.0656 15.6517 15.3585 15.3588C15.6514 15.0659 15.6514 14.591 15.3585 14.2981L13.0604 12L15.3585 9.7019C15.6514 9.40901 15.6514 8.93414 15.3585 8.64124C15.0656 8.34835 14.5907 8.34835 14.2978 8.64124L11.9997 10.9393L9.70164 8.64124Z"></path></svg>';
+    itemRemoveButton.classList.add('text-slate-800', 'hover:scale-105', 'hover:text-black');
+    itemRemoveButton.style.transition = 'transform, color';
     itemRemoveButton.title = 'Remove from Cart';
     // Append the elements to the row
     itemRow.append(itemName, itemPrice, itemRemoveButton);
@@ -124,8 +144,7 @@ function addToCart(article: Article, caller: HTMLButtonElement) {
 
             // If the cart is empty, show the warning message
             if (table.children.length === 2) {
-                dialog.removeChild(table);
-                dialog.appendChild(noItemWarning);
+                dialog.replaceChild(noItemWarning, table);
             }
         }, {once: true});
     }, {once: true});
@@ -141,7 +160,7 @@ function addToCart(article: Article, caller: HTMLButtonElement) {
     itemTotalLabel.textContent = 'Total: ' + formatNumberToEuro(itemTotal);
 
     // Show the dialog if it is hidden
-    if (dialog.classList.contains('scale-0')) {
+    if (dialog.classList.contains('max-[1600px]:scale-0')) {
         toggleCartDialog();
     }
 
