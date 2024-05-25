@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="shopping-cart-id" content="{{ 1 }}"/>
     @yield('meta')
     <title>@yield('title')</title>
 
@@ -109,7 +111,7 @@
                         </svg>
                     </button>
                     <div id="nav-menu-dialog" role="dialog" class="flex flex-col absolute right-0 bg-white rounded-lg w-fit z-50 opacity-0 transition-opacity pointer-events-none">
-                        @vite(["resources/js/navigationMenu.ts"])
+                        @vite(["resources/js/components/navigationMenu.ts"])
                     </div>
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {

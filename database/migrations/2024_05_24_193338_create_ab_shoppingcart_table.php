@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('ab_shoppingcart', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('ab_creator_id')->nullable(false);
-            $table->timestamp('ab_createdate')->nullable(false);
+            $table->timestamp('ab_createdate')->nullable(false)->useCurrent();
 
             $table->foreign('ab_creator_id')->references('id')->on('ab_user')->onDelete('cascade');
         });

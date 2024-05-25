@@ -38,18 +38,21 @@ class NavigationMenu {
         div.classList.add('flex', 'items-stretch');
         const a = document.createElement('a');
         a.href = entry.url;
-        a.classList.add('text-gray-700', 'hover:bg-gray-200', 'py-2', 'px-4', 'grow');
+        a.classList.add('text-slate-700', 'hover:text-black', 'hover:text-shadow-semibold', 'shadow-black', 'py-2', 'px-4', 'grow', 'transition-[colors,text-shadow]');
         a.textContent = entry.label;
         div.appendChild(a)
         li.appendChild(div);
 
         if (entry.children.length > 0) {
-            // Add an arrow icon next to the parent menu item
-            const arrow = document.createElement('button');
-            arrow.textContent = '➤'; // Use a simple arrow for demonstration
-            arrow.classList.add('px-2', 'hover:bg-gray-200');
-            arrow.setAttribute('title', 'Toggle sub entries');
-            div.appendChild(arrow);
+            // Add an arrow button next to the parent menu item
+            const arrowButton = document.createElement('button');
+            arrowButton.classList.add('p-2', 'group/arrow', 'flex', 'justify-center', 'focus:outline-none');
+            arrowButton.setAttribute('title', 'Toggle sub entries');
+            const arrow = document.createElement('p');
+            arrowButton.appendChild(arrow);
+            arrow.textContent = '﹥'; // Use a simple arrow for demonstration
+            arrow.classList.add('scale-150', 'shadow-black', 'transition-[colors,text-shadow,transform]', 'group-hover/arrow:text-shadow-semibold', 'group-hover/arrow:text-black');
+            div.appendChild(arrowButton);
 
             const ul = document.createElement('ul');
             ul.classList.add('overflow-hidden', 'transition-height');
@@ -58,10 +61,17 @@ class NavigationMenu {
             li.appendChild(ul);
 
             // Toggle sub entries on arrow click
-            arrow.addEventListener('click', () => {
+            arrowButton.addEventListener('click', () => {
                 const isHidden = ul.style.height === '0px';
-                ul.style.height = isHidden ? `${ul.scrollHeight}px` : '0';
-                arrow.textContent = isHidden ? '⮟' : '➤';
+                const ulScrollHeight = ul.scrollHeight;
+                ul.style.height = isHidden ? `${ulScrollHeight}px` : '0';
+                arrow.classList.toggle('rotate-90');
+                // Update the height of the parent ul elements
+                let parent = li.parentElement;
+                while (parent && parent.tagName === 'UL') {
+                    parent.style.height = isHidden ? `${parent.scrollHeight + ulScrollHeight}px` : `${parent.scrollHeight - ulScrollHeight}px`;
+                    parent = parent.parentElement?.parentElement ?? null;
+                }
             });
         }
 
@@ -69,35 +79,16 @@ class NavigationMenu {
     }
 
     createNavigationMenu(): HTMLElement {
-        console.log("Hello from NEW navigationMenu.ts");
-
         // Create the navigation element
         const nav = document.createElement('nav');
-        nav.appendChild(document.createElement('ul'));
+        const ul = document.createElement('ul');
+        ul.classList.add('overflow-hidden', 'transition-height');
+        nav.appendChild(ul);
         nav.classList.add('bg-white', 'shadow', 'rounded-lg', 'p-4'); // Add Tailwind classes
 
-        /*
-        // Declare menu entries (PLACED BELOW CLASS DECL.)
-        const entries: NavigationMenuEntry[] =
-            [
-                {label: "Home", url: "/", children: []},
-                {label: "Kategorien", url: "/categories", children: []},
-                {label: "Verkaufen", url: "/sell", children: []},
-                {
-                    label: "Unternehmen", url: "/company", children: [
-                        {label: "Philosophie", url: "/company/philosophy", children: []},
-                        {label: "Karriere", url: "/career", children: []},
-                    ]
-                },
-            ];
-
-         */
-
         // Create and append the menu entries
-        // @ts-ignore
-        entries.forEach(entry => nav.firstChild.appendChild(this.createMenuEntry(entry)));
-        // @ts-ignore
-        nav.firstElementChild.lastElementChild.classList.remove('border-b');
+        entries.forEach(entry => ul.appendChild(this.createMenuEntry(entry)));
+        nav.firstElementChild!.lastElementChild!.classList.remove('border-b');
         return nav;
     }
 }
@@ -111,7 +102,7 @@ const entries: NavigationMenuEntry[] =
         //{label: "Kategorien", url: "/categories", children: []},
         {
             label: "Kategorien", url: "/categories", children: [
-                {label: "Electronik", url: "/categories/electronics", children: []},
+                {label: "Elektronik", url: "/categories/electronics", children: []},
                 {label: "Kleidung", url: "/categories/clothing", children: []},
                 {label: "Bücher", url: "/categories/books", children: [
                         {label: "Fiktion", url: "/categories/books/fiction", children: []},
@@ -155,4 +146,6 @@ const entries: NavigationMenuEntry[] =
 const navMenu = new NavigationMenu(entries);
 
 // 3. When the script is loaded, insert the navigation menu at the current script tag position
-document.scripts[document.scripts.length - 1].insertAdjacentElement('afterend', navMenu.createNavigationMenu());
+// document.scripts[document.scripts.length - 1].insertAdjacentElement('afterend', navMenu.createNavigationMenu());
+// 3. Hardcoded navigation menu position
+document.querySelector("div[role='dialog']")!.appendChild(navMenu.createNavigationMenu());

@@ -15,10 +15,12 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('ab_shoppingcart_id')->nullable(false);
             $table->unsignedBigInteger('ab_article_id')->nullable(false);
-            $table->timestamp('ab_createdate')->nullable(false);
+            $table->timestamp('ab_createdate')->nullable(false)->useCurrent();
 
             $table->foreign('ab_shoppingcart_id')->references('id')->on('ab_shoppingcart')->onDelete('cascade');
-            $table->foreign('ab_article_id')->references('id')->on('ab_article')->onDelete('cascade');
+            $table->foreign('ab_article_id')->references('id')->on('ab_article'); // ->onDelete('cascade');
+
+            $table->unique(['ab_shoppingcart_id', 'ab_article_id']);
         });
     }
 
