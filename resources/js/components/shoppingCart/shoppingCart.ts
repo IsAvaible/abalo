@@ -1,6 +1,5 @@
 import {formatNumberToEuro} from "../../util/formatNumberToEuro";
 import Article from "../articles/Article";
-import ShoppingCartItem from "./ShoppingCartItem";
 
 // Create the shopping cart button
 const cartButton = document.createElement('button');
@@ -69,19 +68,20 @@ const cart: Article[] = []
 
 // Function to add an article to the cart
 export function addToCart(article: Article, fromDB: boolean = false) {
-    if (!fromDB) console.log('Adding article with name', article.ab_name, 'to the cart.');
+    const shoppingCartId = JSON.parse(document.querySelector('meta[name="shopping-cart-id"]')!.getAttribute('content')!);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    const syncWithRemote = !fromDB && shoppingCartId && csrfToken;
+
+    if (!fromDB && !syncWithRemote) {
+        console.log("Adding article with name", article.ab_name, "to the local cart.");
+    }
+
+    if (syncWithRemote) console.log('Adding article with name', article.ab_name, 'to the remote cart.');
 
     // Check if the item is already in the cart
     if (cart.find((a) => a.id === article.id)) {
         console.error('Article is already in the cart.');
-        return;
-    }
-
-    const shoppingCartId = document.querySelector('meta[name="shopping-cart-id"]')?.getAttribute('content');
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-    if (!shoppingCartId || !csrfToken) {
-        console.error('Shopping Cart ID or CSRF Token not found. Try refreshing the page.');
         return;
     }
 
@@ -94,7 +94,7 @@ export function addToCart(article: Article, fromDB: boolean = false) {
     // Add the article to the cart
     cart.push(article);
 
-    if (!fromDB) {
+    if (syncWithRemote) {
         // Add the article to the remote shopping cart
         fetch(`/api/shoppingcart/${shoppingCartId}/articles/${article.id}`, {
             method: 'POST',
@@ -146,22 +146,30 @@ export function addToCart(article: Article, fromDB: boolean = false) {
             itemRow.classList.add('opacity-0');
         });
 
-        fetch(`/api/shoppingcart/${shoppingCartId}/articles/${article.id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken!
-            }
-        }).then(response => {
-            if (!response || !response.ok) {
-                return Promise.reject(response);
-            }
-        }).catch(error => {
-            console.error('Error removing article from shopping cart:', error);
+        const shoppingCartId = JSON.parse(document.querySelector('meta[name="shopping-cart-id"]')!.getAttribute('content')!);
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-            // Re-add the article to the cart
-            addToCart(article);
-        });
+        if (shoppingCartId && csrfToken) {
+            console.log('Removing article with name', article.ab_name, 'from the remote cart.');
+            fetch(`/api/shoppingcart/${shoppingCartId}/articles/${article.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken!
+                }
+            }).then(response => {
+                if (!response || !response.ok) {
+                    return Promise.reject(response);
+                }
+            }).catch(error => {
+                console.error('Error removing article from shopping cart:', error);
+
+                // Re-add the article to the cart
+                addToCart(article);
+            });
+        } else {
+            console.log('Removing article with name', article.ab_name, 'from the local cart.');
+        }
 
         // Reset the button in the overview table
         addToCartButton.title = 'Add to Cart';
@@ -203,73 +211,31 @@ export function addToCart(article: Article, fromDB: boolean = false) {
     addToCartButton.disabled = true;
 }
 
-// Append the dialog and button to the body
+// When the document is loaded, fetch the shopping cart items and display the dialog
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Fetching shopping cart items...');
 
+    // TODO: Shopping cart data should be available on all pages, not only the article overview
     // Get the shopping cart ID
-    let cartID = document.querySelector('meta[name="shopping-cart-id"]')?.getAttribute('content');
-
-    // If the shopping cart ID is not set, fetch it from the server (potentially creating a new shopping cart)
-    if (!cartID) {
-        console.log('Shopping cart ID not found. Fetching from the server...');
-
-        const response = await fetch(`/api/shoppingcart`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        if (!response || !response.ok) {
-            console.error('Failed to fetch the shopping cart ID. Try refreshing the page.');
-            return;
-        }
-        cartID = (await response.json()).shoppingCartId;
-        document.querySelector('meta[name="shopping-cart-id"]')!.setAttribute('content', cartID!);
-    }
+    const cartID = JSON.parse(document.querySelector('meta[name="shopping-cart-id"]')!.getAttribute('content')!);
 
     console.log('Shopping cart ID:', cartID);
-    console.log('Fetching remote cart items...');
 
-    // Get the articles from the remote cart
-    const response = await fetch(`/api/shoppingcart/${cartID}/articles`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }).catch(console.error);
+    if (cartID !== null && !isNaN(cartID)) {
+        const articles = JSON.parse(document.querySelector('meta[name="initial-shopping-cart-articles"]')!.getAttribute('content')!) as Article[];
+        console.log('Shopping cart articles:', articles);
 
-    if (!response || !response.ok) {
-        console.error('Failed to fetch remote cart items.');
-        return;
+        // Wait for the articles overview to be loaded
+        document.getElementById('articles')!.addEventListener('load', () => {
+            // Add the articles to the cart
+            for (const article of articles) {
+                addToCart(article, true);
+            }
+            document.getElementById('shopping-cart')!.replaceChild(dialog, loadingSpinner);
+            document.body.appendChild(cartButton);
+        }, {once: true});
+    } else {
+        document.getElementById('shopping-cart')!.replaceChild(dialog, loadingSpinner);
+        document.body.appendChild(cartButton);
     }
-
-    const remoteCartItems = (await response.json()).shoppingCartItems as ShoppingCartItem[];
-
-    console.log('Fetched remote cart items:', remoteCartItems);
-    console.log('Fetching missing articles...');
-
-    // Get the missing articles
-    const missingArticlesResponse = await fetch(`/api/articles/search`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({articleIDs: remoteCartItems.map(item => item.ab_article_id)})
-    }).catch(console.error);
-
-    if (!missingArticlesResponse || !missingArticlesResponse.ok) {
-        console.error('Failed to fetch missing articles. Try refreshing the page.');
-        return;
-    }
-
-    console.log('Fetched missing articles:', cart);
-
-    // Add the articles to the cart
-    (await missingArticlesResponse.json()).articles.forEach(article => {
-        addToCart(article, true);
-    });
-
-    document.getElementById('shopping-cart')!.replaceChild(dialog, loadingSpinner);
-    document.body.appendChild(cartButton);
 });

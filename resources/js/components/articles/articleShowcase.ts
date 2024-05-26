@@ -44,5 +44,7 @@ export default class ArticleShowcase
             div.appendChild(clearButton);
             this.htmlElement.appendChild(div);
         }
+        // Trigger load event
+        this.htmlElement.dispatchEvent(new Event('load'));
     }
 }

@@ -2,6 +2,12 @@
 
 @section('title', 'Articles')
 
+@section('meta')
+    <meta name="description" content="Discover our articles below."/>
+    <meta name="shopping-cart-id" content="{{ json_encode($shoppingCartId) }}"/>
+    <meta name="initial-shopping-cart-articles" content="{{ json_encode(array_values($shoppingCartArticles)) }}"/>
+@endsection
+
 @section('content')
     <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-slate-100 sm:text-5xl md:text-6xl">Articles Overview</h1>
     <p class="mt-3 max-w-md mx-auto text-base text-gray-500 dark:text-slate-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">Discover our articles below.</p>

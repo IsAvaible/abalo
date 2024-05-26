@@ -13,7 +13,17 @@ class ShoppingCartAPIController
 {
     public function index(Request $request): JsonResponse
     {
-        return $this->createShoppingCart($request);
+        // Check if the user is authenticated
+//        if (!$request->user()) {
+//            return response()->json(['error' => 'Unauthorized users cannot create or access shopping carts'], 401);
+//        }
+        // If no shopping cart exists, create a new one
+        $shoppingCart = ShoppingCart::where('ab_creator_id', $request->user()->id ?? 1)->first();
+        if ($shoppingCart->exists()) {
+            return response()->json(['shoppingCartId' => $shoppingCart->id], 200);
+        } else {
+            return $this->createShoppingCart($request);
+        }
     }
 
     /**
@@ -29,7 +39,7 @@ class ShoppingCartAPIController
         $shoppingCart->save();
 
         // Respond with the shopping cart ID
-        return response()->json(['shoppingCartId' => $shoppingCart->id]);
+        return response()->json(['shoppingCartId' => $shoppingCart->id], 201);
     }
 
     /**
@@ -37,7 +47,7 @@ class ShoppingCartAPIController
      * @param Request $request The request
      * @return JsonResponse The shopping cart items
      */
-    public function getShoppingCart(Request $request): JsonResponse
+    public function getShoppingCartItems(Request $request): JsonResponse
     {
         // Update the shopping cart ID
         $request->merge(['shoppingCartId' => $request->route('shoppingCartId')]);
@@ -45,6 +55,9 @@ class ShoppingCartAPIController
         $validator = Validator::make($request->all(), [
             'shoppingCartId' => ['required', 'numeric', 'exists:ab_shoppingcart,id'],
         ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
 
         // Get the shopping cart items
         $shoppingCartItems = ShoppingCartItem::where('ab_shoppingcart_id', $request->route('shoppingCartId'))->get();

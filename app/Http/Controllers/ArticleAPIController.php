@@ -34,7 +34,7 @@ class ArticleAPIController extends Controller
         $articleIDs = $request->input('articleIDs'); // Array of article IDs
 
         // Get the matching articles
-        $articles = Article::whereRaw(($request->has('articleIDs') ? (' id IN ' . '(' . (count($articleIDs) ? implode(',', $articleIDs) : 'NULL') . ')' . ' AND'): '')  . ' LOWER(ab_name) LIKE ?', '%' . strtolower($search) . '%')->limit($limit)->get();
+        $articles = Article::where('ab_name', 'ilike', '%'.$search.'%')->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL)->limit($limit)->get();
 
         // Add the image path to each article
         foreach ($articles as $article) {
