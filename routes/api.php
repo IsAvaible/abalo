@@ -8,5 +8,5 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // M3-A7
-Route::get('/articles/', [App\Http\Controllers\ArticleAPIController::class, 'index_api'])->name('articles_api');
-
+Route::get('/articles/', [App\Http\Controllers\ArticleAPIController::class, 'index_api'])->name('api.articles');
+Route::post('/articles', [App\Http\Controllers\ArticleAPIController::class, 'store_api'])->name('api.articles.store');

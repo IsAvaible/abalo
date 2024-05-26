@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Validator;
 
 class ArticleAPIController extends Controller
 {
-    public function index_api(Request $request): \Illuminate\Http\JsonResponse
+    public function index_api(Request $request): JsonResponse
     {
         // Validate the request
 //        $validator = Validator::make($request->all(), [
@@ -37,15 +38,18 @@ class ArticleAPIController extends Controller
     /**
      * Store a newly created article in storage.
      */
-    public function store_api(Request $request): \Illuminate\Http\JsonResponse
+    public function store_api(Request $request): JsonResponse
     {
         // Validate the request
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required',
             'description' => 'required',
             'price' => ['required', 'numeric', 'min:0'],
             'image' => ['required', 'image', 'max:2048'],
         ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
 
         // Create a new article
         $article = new Article();
@@ -61,7 +65,7 @@ class ArticleAPIController extends Controller
         $image->move(public_path('images'), $imageName);
 
         // Respond with success message
-        return response(status: 201)->json(['message' => 'Article created successfully', 'id' => $article->id]);
+        return response()->json(['message' => 'Article created successfully', 'id' => $article->id], 201);
     }
 
     /**

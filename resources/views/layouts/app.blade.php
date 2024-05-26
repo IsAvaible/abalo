@@ -109,7 +109,7 @@
                         </svg>
                     </button>
                     <div id="nav-menu-dialog" role="dialog" class="flex flex-col absolute right-0 bg-white rounded-lg w-fit z-50 opacity-0 transition-opacity pointer-events-none">
-                        @vite(["resources/js/navigationMenu.ts"])
+                        @vite(["resources/js/components/NavigationMenu.ts"])
                     </div>
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
@@ -139,16 +139,6 @@
                         });
                     </script>
                 </div>
-{{--                <div class="w-6 h-6 relative">--}}
-{{--                    <button id="hamburger-button" class="transition-transform py-1 overflow-visible grid content-between h-6 group-focus-within:scale-100">--}}
-{{--                        <span class="h-0.5 w-6 rounded-full bg-black transition group-focus-within:rotate-45 group-focus-within:translate-y-2 group-focus-within:w-4 duration-300"></span>--}}
-{{--                        <span class="h-0.5 w-6 rounded-full bg-black group-focus-within:scale-x-0 group-focus-within:opacity-0 transition duration-150"></span>--}}
-{{--                        <span class="h-0.5 w-6 rounded-full bg-black transition ml-auto origin-top-right group-focus-within:-rotate-45 group-focus-within:-translate-y-[0.725rem] group-focus-within:w-4 duration-300"></span>--}}
-{{--                    </button>--}}
-{{--                    <div id="nav-menu-dialog" role="dialog" class="flex flex-col absolute right-0 bg-white rounded-lg w-fit z-50 opacity-0 transition-opacity pointer-events-none">--}}
-{{--                        @vite(["resources/js/navigationMenu.ts"])--}}
-{{--                    </div>--}}
-{{--                </div>--}}
             </div>
         </nav>
     </header>

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
@@ -26,35 +25,5 @@ class ArticleController extends Controller
     public function add(): View
     {
         return view('articles.add');
-    }
-
-    /**
-     * Store a newly created article in storage.
-     */
-    public function store(Request $request): \Illuminate\Http\JsonResponse
-    {
-        // Validate the request
-        $request->validate([
-            'name' => 'required',
-            'description' => 'required',
-            'price' => ['required', 'numeric', 'min:0'],
-            'image' => ['required', 'image', 'max:2048'],
-        ]);
-
-        // Create a new article
-        $article = new Article();
-        $article->ab_name = $request->input('name');
-        $article->ab_description = $request->input('description');
-        $article->ab_price = $request->input('price');
-        $article->ab_creator_id = 1; // $request->session()->get('abalo_user');
-        $article->save();
-
-        // Store the image
-        $image = $request->file('image');
-        $imageName = $article->id . '.' . $image->extension();
-        $image->move(public_path('images'), $imageName);
-
-        // Return a response
-        return response()->json(['message' => 'Article created successfully!'], 201);
     }
 }

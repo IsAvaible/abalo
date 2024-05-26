@@ -48,6 +48,9 @@ submitButton.id = 'input_submit';
 submitButton.classList.add('col-span-2', 'py-3', 'rounded-md', 'bg-slate-800', 'hover:bg-slate-900', 'text-white', 'font-semibold', 'transition-colors', 'duration-200', 'ease-in-out', 'shadow-md', 'dark:bg-blue-400', 'dark:hover:bg-blue-500', 'dark:shadow-none');
 submitButton.classList.add('col-span-2', 'py-3', 'rounded-md', 'bg-slate-800', 'hover:bg-slate-900', 'text-white', 'font-semibold', 'transition-colors', 'duration-200', 'ease-in-out', 'shadow-md', 'dark:bg-blue-400', 'dark:hover:bg-blue-500', 'dark:shadow-none', 'disabled:animate-pulse');
 
+const messageContainer = document.createElement('div');
+messageContainer.classList.add('alert', 'alert-info', 'text-center', 'col-span-2');
+
 /// M3-A2
 // Register the event listener for the form submission
 // When the form is submitted, send a POST request using AJAX to the server
@@ -110,11 +113,9 @@ form.addEventListener('submit', async (event) => {
 
 form.append(nameLabel, nameInput, descriptionLabel, descriptionInput, priceLabel, priceInput, categoryLabel, categoryInput, imageLabel, imageInput, csrfToken, submitButton);
 
-const messageContainer = document.createElement('div');
-messageContainer.classList.add('alert', 'alert-info', 'text-center', 'col-span-2');
+// When the script is loaded, replace the placeholder container with the form
+document.getElementById('article-form')!.replaceWith(form);
 
-// When the script is loaded, insert the form at the current script tag position
-document.scripts[document.scripts.length - 1].insertAdjacentElement('afterend', form);
 
 /**
  * Create an input field

@@ -69,7 +69,7 @@ class NavigationMenu {
     }
 
     createNavigationMenu(): HTMLElement {
-        console.log("Hello from NEW navigationMenu.ts");
+        console.log("Hello from NEW NavigationMenu.ts");
 
         // Create the navigation element
         const nav = document.createElement('nav');
@@ -154,5 +154,5 @@ const entries: NavigationMenuEntry[] =
 // 2. Create instance of the navigation menu
 const navMenu = new NavigationMenu(entries);
 
-// 3. When the script is loaded, insert the navigation menu at the current script tag position
-document.scripts[document.scripts.length - 1].insertAdjacentElement('afterend', navMenu.createNavigationMenu());
+// 3. When the script is loaded, insert the navigation menu at the hard-coded position
+document.getElementById('nav-menu-dialog')?.appendChild(navMenu.createNavigationMenu());
