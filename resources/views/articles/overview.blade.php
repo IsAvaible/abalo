@@ -88,26 +88,17 @@
                             <svg width="24px" height="24px" viewBox="0 0 24 24" stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M10 14H2" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 10H2" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 6H2" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 18H2" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 20V4M19 20L22 17M19 20L16 17M19 4L22 7M19 4L16 7" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         </button>
                     </div>
-                    @foreach ($data as $article)
-                        <div class="bg-white shadow-md rounded-lg flex flex-col">
-                            <div class="relative rounded-t-[inherit]">
-                                <img src='{{$images[$article['id']]}}' alt='image' class="rounded-t-[inherit] aspect-square object-cover w-full">
-                                <button class="absolute top-2 right-2 bg-white text-slate-800 hover:text-black opacity-80 [&:hover:not(:disabled)]:opacity-100 disabled:opacity-30 p-2 rounded disabled:cursor-not-allowed" title="Add to Cart" onclick="addToCart({{$article}}, this)">
-                                    <svg width="24px" height="24px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor"><path d="M3 6H22L19 16H6L3 6ZM3 6L2.25 3.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9.99219 11H11.9922M13.9922 11H11.9922M11.9922 11V9M11.9922 11V13" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11 19.5C11 20.3284 10.3284 21 9.5 21C8.67157 21 8 20.3284 8 19.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M17 19.5C17 20.3284 16.3284 21 15.5 21C14.6716 21 14 20.3284 14 19.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                                </button>
-                            </div>
-                            <div class="p-2 flex flex-col gap-y-2 grow">
-                                <h3 class="text-lg font-semibold text-slate-800">{{$article['ab_name']}}</h3>
-                                <p class="text-slate-600">{{$article['ab_description']}}</p>
-                                <p class="text-slate-600 self-end mt-auto">{{number_format($article['ab_price'], decimal_separator: ',', thousands_separator: '.')}} €</p>
-                            </div>
-                        </div>
-                    @endforeach
+                    <!-- Articles -->
+                    <section id="articles" aria-description="List of articles" class="col-span-full grid grid-cols-[inherit] gap-[inherit]"></section>
                 </div>
             </div>
-            <div>
-                @vite('resources/js/shoppingCart.ts')
+            <div id="shopping-cart">
+                @vite('resources/js/components/articles/shoppingCart.ts')
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    @vite('resources/js/components/articles/articlesOverview.ts')
 @endsection

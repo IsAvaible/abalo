@@ -1,14 +1,5 @@
-/**
- * Interface for the article object
- */
-interface Article {
-    id: number;
-    ab_name: string;
-    ab_price: number;
-    ab_description: string;
-    ab_creator_id: number;
-    ab_createdate: Date;
-}
+import {formatNumberToEuro} from "../../util/formatNumberToEuro";
+import {Article} from "./Article";
 
 // Create the shopping cart button
 const cartButton = document.createElement('button');
@@ -21,7 +12,7 @@ cartButton.title = 'Open Shopping Cart';
 // Create the shopping cart dialog
 const dialog = document.createElement('div');
 dialog.setAttribute('role', 'dialog');
-dialog.className = 'max-[1600px]:fixed bottom-20 right-4 bg-white rounded-lg max-[1600px]:shadow-lg p-4 max-[1600px]:pointer-events-none max-[1600px]:opacity-0 max-[1600px]:scale-0 origin-[calc(100%_-_2rem)_bottom] duration-300 min-w-68 z-50';
+dialog.className = 'max-[1600px]:fixed bottom-20 right-4 bg-white rounded-lg max-[1600px]:shadow-lg p-4 max-[1600px]:pointer-events-none max-[1600px]:opacity-0 max-[1600px]:scale-0 origin-[calc(100%_-_2rem)_bottom] duration-300 min-w-68';
 dialog.style.transitionProperty = 'opacity, transform';
 
 /**
@@ -71,6 +62,7 @@ setTimeout(() => {
 }, 0);
 
 // Scroll event listener to adjust the position of the cart button and dialog
+// so that they always stay atop the footer
 window.addEventListener('scroll', () => {
     const visibleFooterHeight = Math.max(window.innerHeight - footer!.getBoundingClientRect().top, 0);
     if (visibleFooterHeight > 0) {
@@ -82,15 +74,11 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// Append the dialog and button to the body
-document.scripts[document.scripts.length - 1].insertAdjacentElement('afterend', dialog);
-document.body.appendChild(cartButton);
-
 // Array to store the articles in the cart
 const articles: Article[] = []
 
 // Function to add an article to the cart
-function addToCart(article: Article, caller: HTMLButtonElement) {
+export function addToCart(article: Article, caller: HTMLButtonElement) {
     // Check if the item is already in the cart
     if (articles.find((a) => a.id === article.id)) {
         return;
@@ -169,13 +157,9 @@ function addToCart(article: Article, caller: HTMLButtonElement) {
     caller.disabled = true;
 }
 
-// Make the function available in the global scope
-window.addToCart = addToCart;
-
-/**
- * Function to format a number to Euro format
- * @param number The number to format
- */
-function formatNumberToEuro(number: number) {
-    return new Intl.NumberFormat('de-DE').format(Number(number.toFixed(2))) + ' €';
-}
+// Append the dialog and button to the body
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('shopping-cart')!.innerHTML = '';
+    document.getElementById('shopping-cart')!.appendChild(dialog);
+    document.body.appendChild(cartButton);
+});

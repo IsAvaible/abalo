@@ -16,18 +16,8 @@ class ArticleController extends Controller
      */
     public function index(Request $request): View
     {
-        // Get the search keyword
-        $keyword = $request->query('search');
-        // Find the articles (case-insensitive)
-        $data = Article::whereRaw('LOWER(ab_name) LIKE ?', '%' . strtolower($keyword) . '%')->get();
-        // Find the images
-        $images = [];
-        foreach ($data as $article) {
-            $images[$article['id']] = ArticleController::fingImage($article['id']);
-        }
         // Return the view
-        // TODO: only first nine until image compression is implemented
-        return view('articles.overview', ['data' => $data->take(9), 'images' => $images, 'search' => $keyword]);
+        return view('articles.overview', ['search' => $request->query('search')]);
     }
 
     /**
@@ -66,29 +56,5 @@ class ArticleController extends Controller
 
         // Return a response
         return response()->json(['message' => 'Article created successfully!'], 201);
-    }
-
-    /**
-     * Find article image by ID
-     * @param int $articleID The article ID
-     * @return string|null The image path or NULL if not found
-     */
-    public function fingImage(int $articleID): ?string
-    {
-        // Get the path to the images directory
-        $dir = public_path("images");
-        // Get all files in the directory
-        $files = glob($dir . '/*');
-
-        // Iterate over the files
-        foreach ($files as $filePath) {
-            $file = basename($filePath);
-            // Check if the file name starts with the article ID
-            if (explode('.', $file)[0] == $articleID) {
-                // Return the image path as asset
-                return asset('images/' . $file);
-            }
-        }
-        return NULL;
     }
 }
