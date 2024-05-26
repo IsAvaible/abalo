@@ -31,8 +31,8 @@ export function createNavigationMenu(): HTMLElement {
             },
         ];
     // Create and append the menu entries
-    entries.forEach(entry => nav.firstChild.appendChild(createMenuEntry(entry)));
-    nav.firstElementChild.lastElementChild.classList.remove('border-b');
+    entries.forEach(entry => nav.firstChild!.appendChild(createMenuEntry(entry)));
+    nav.firstElementChild!.lastElementChild!.classList.remove('border-b');
     return nav;
 }
 
