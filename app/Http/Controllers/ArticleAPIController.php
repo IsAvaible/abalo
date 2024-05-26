@@ -40,19 +40,23 @@ class ArticleAPIController extends Controller
     public function store_api(Request $request): \Illuminate\Http\JsonResponse
     {
         // Validate the request
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required',
             'description' => 'required',
             'price' => ['required', 'numeric', 'min:0'],
             'image' => ['required', 'image', 'max:2048'],
         ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
 
         // Create a new article
         $article = new Article();
-        $article->ab_name = $request->input('name');
-        $article->ab_description = $request->input('description');
-        $article->ab_price = $request->input('price');
+        $article->ab_name = htmlspecialchars($request->input('name'));
+        $article->ab_description = htmlspecialchars($request->input('description'));
+        $article->ab_price = htmlspecialchars($request->input('price'));
         $article->ab_creator_id = 1; // $request->session()->get('abalo_user');
+        $article->ab_createdate = now();
         $article->save();
 
         // Store the image
@@ -61,7 +65,7 @@ class ArticleAPIController extends Controller
         $image->move(public_path('images'), $imageName);
 
         // Respond with success message
-        return response(status: 201)->json(['message' => 'Article created successfully', 'id' => $article->id]);
+        return response()->json(['message' => 'Article created successfully', 'id' => $article->id], 201);
     }
 
     /**

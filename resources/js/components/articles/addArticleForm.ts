@@ -55,7 +55,8 @@ submitButton.classList.add('col-span-2', 'py-3', 'rounded-md', 'bg-slate-800', '
 form.append(nameLabel, nameInput, descriptionLabel, descriptionInput, priceLabel, priceInput, categoryLabel, categoryInput, imageLabel, imageInput, csrfToken, submitButton);
 
 // When the script is loaded, insert the form at the current script tag position
-document.scripts[document.scripts.length - 1].insertAdjacentElement('afterend', form);
+document.getElementById('article-form')!.replaceWith(form);
+
 
 /**
  * Create an input field
@@ -79,7 +80,7 @@ function createInputField(type: string, label: string, placeholder: string, name
     labelElm.textContent = label;
 
     input.name = name;
-    input.required = true;
+    // input.required = true;
     input.classList.add('w-full', 'dark:bg-slate-900', 'rounded-md', 'py-3', 'px-[14px]', 'font-normal', 'border', 'border-slate-300', 'dark:border-slate-900', 'outline-none', 'focus-visible:shadow-none', 'focus:border-blue-500', 'grow');
 
     return [labelElm, input];

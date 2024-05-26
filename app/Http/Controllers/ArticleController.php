@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Article;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
@@ -31,28 +31,19 @@ class ArticleController extends Controller
     /**
      * Store a newly created article in storage.
      */
-    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        // Validate the request
-        $request->validate([
-            'name' => 'required',
-            'description' => 'required',
-            'price' => ['required', 'numeric', 'min:0'],
-            'image' => ['required', 'image', 'max:2048'],
-        ]);
+        // Reroute the request to the API
+        $request->server->set('REQUEST_URI', '/api/articles');
+        $response = app()->handle($request);
 
-        // Create a new article
-        $article = new Article();
-        $article->ab_name = $request->input('name');
-        $article->ab_description = $request->input('description');
-        $article->ab_price = $request->input('price');
-        $article->ab_creator_id = 1; // $request->session()->get('abalo_user');
-        $article->save();
-
-        // Store the image
-        $image = $request->file('image');
-        $imageName = $article->id . '.' . $image->extension();
-        $image->move(public_path('images'), $imageName);
+        var_dump($response->getStatusCode());
+        // Check if the request was successful
+        if ($response->getStatusCode() !== 201) {
+            $errors = json_decode($response->getContent(), true)['error'];
+            // Return back with previous input and an error message
+            return redirect()->back()->withInput($request->input())->withErrors($errors);
+        }
 
         // Redirect to the articles overview
         return redirect()->route('articles')->with('success', 'Article created successfully.');
