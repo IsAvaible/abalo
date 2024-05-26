@@ -8,18 +8,18 @@ form.enctype = 'multipart/form-data';
 
 // Create the input fields
 const [nameLabel, nameInput]
-    = createInputField('text', 'Name', '', 'name');
+    = createInputField('text', 'Name', '', 'name', 'input_name');
 const [descriptionLabel, descriptionInput]
-    = createInputField('text', 'Description', '', 'description');
+    = createInputField('text', 'Description', '', 'description', 'input_description');
 const [priceLabel, priceInput]
-    = createInputField('number', 'Price', '', 'price');
+    = createInputField('number', 'Price', '', 'price', 'input_price');
 const [categoryLabel, categoryInput]
-    = createInputField('select', 'Category', '', 'category');
+    = createInputField('select', 'Category', '', 'category', 'input_category');
 const [imageLabel, imageInput]
-    = createInputField('file', 'Image', '', 'image');
+    = createInputField('file', 'Image', '', 'image', 'input_image');
 
 // Set the step and min attributes for the price input
-priceInput.setAttribute('step', '0.01');
+priceInput.setAttribute('step', '0.01');    // "Precision" of input
 priceInput.setAttribute('min', '0');
 
 // Add options to the select element
@@ -44,8 +44,11 @@ csrfToken.value = document.querySelector('meta[name="csrf-token"]')!.getAttribut
 const submitButton = document.createElement('button');
 submitButton.type = 'submit';
 submitButton.textContent = 'Submit';
+submitButton.id = 'input_submit';
+submitButton.classList.add('col-span-2', 'py-3', 'rounded-md', 'bg-slate-800', 'hover:bg-slate-900', 'text-white', 'font-semibold', 'transition-colors', 'duration-200', 'ease-in-out', 'shadow-md', 'dark:bg-blue-400', 'dark:hover:bg-blue-500', 'dark:shadow-none');
 submitButton.classList.add('col-span-2', 'py-3', 'rounded-md', 'bg-slate-800', 'hover:bg-slate-900', 'text-white', 'font-semibold', 'transition-colors', 'duration-200', 'ease-in-out', 'shadow-md', 'dark:bg-blue-400', 'dark:hover:bg-blue-500', 'dark:shadow-none', 'disabled:animate-pulse');
 
+/// M3-A2
 // Register the event listener for the form submission
 // When the form is submitted, send a POST request using AJAX to the server
 form.addEventListener('submit', async (event) => {
@@ -56,8 +59,10 @@ form.addEventListener('submit', async (event) => {
     // Remove the message and error containers if they exist
     if (form.contains(messageContainer)) form.removeChild(messageContainer);
 
-    // Prepare the xhr request
+    // Get the form data
     const formData = new FormData(form);
+
+    // Prepare the xhr request
     const xhr = new XMLHttpRequest();
     xhr.open('POST', form.action);
     xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken.value);
@@ -65,7 +70,6 @@ form.addEventListener('submit', async (event) => {
 
     xhr.onreadystatechange = () => {
         if (xhr.readyState === XMLHttpRequest.DONE) {
-            submitButton.disabled = false; // Re-enable the submit button
             const response = JSON.parse(xhr.responseText);
             if (xhr.status === 201) {
                 // Display the success message
@@ -91,6 +95,7 @@ form.addEventListener('submit', async (event) => {
                 // Display the first error message
                 form.reportValidity();
             }
+            submitButton.disabled = false; // Re-enable the submit button
         }
     }
     xhr.send(formData);
@@ -110,9 +115,10 @@ document.scripts[document.scripts.length - 1].insertAdjacentElement('afterend', 
  * @param label
  * @param placeholder
  * @param name
+ * @param id
  * @returns
  */
-function createInputField(type: string, label: string, placeholder: string, name: string) {
+function createInputField(type: string, label: string, placeholder: string, name: string, id: string) {
     const labelElm = document.createElement('label');
     let input: HTMLInputElement | HTMLSelectElement;
     if (type === 'select') {
@@ -121,14 +127,15 @@ function createInputField(type: string, label: string, placeholder: string, name
         input = document.createElement('input');
         input.type = type;
         input.placeholder = placeholder;
+        input.id = id;
     }
 
     labelElm.textContent = label;
 
     input.name = name;
+    input.id = id;
     input.required = true;
     input.classList.add('w-full', 'dark:bg-slate-900', 'rounded-md', 'py-3', 'px-[14px]', 'font-normal', 'border', 'border-slate-300', 'dark:border-slate-900', 'outline-none', 'focus-visible:shadow-none', 'focus:border-blue-500', 'grow');
 
     return [labelElm, input];
 }
-
