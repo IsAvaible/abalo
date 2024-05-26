@@ -41,7 +41,7 @@ class ArticleController extends Controller
     /**
      * Store a newly created article in storage.
      */
-    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         // Validate the request
         $request->validate([
@@ -64,8 +64,8 @@ class ArticleController extends Controller
         $imageName = $article->id . '.' . $image->extension();
         $image->move(public_path('images'), $imageName);
 
-        // Redirect to the articles overview
-        return redirect()->route('articles')->with('success', 'Article created successfully.');
+        // Return a response
+        return response()->json(['message' => 'Article created successfully!'], 201);
     }
 
     /**
