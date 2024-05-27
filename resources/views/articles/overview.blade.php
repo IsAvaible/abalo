@@ -2,6 +2,12 @@
 
 @section('title', 'Articles')
 
+@section('meta')
+    <meta name="description" content="Discover our articles below."/>
+    <meta name="shopping-cart-id" content="{{ json_encode($shoppingCartId) }}"/>
+    <meta name="initial-shopping-cart-articles" content="{{ json_encode(array_values($shoppingCartArticles)) }}"/>
+@endsection
+
 @section('content')
     <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-slate-100 sm:text-5xl md:text-6xl">Articles Overview</h1>
     <p class="mt-3 max-w-md mx-auto text-base text-gray-500 dark:text-slate-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">Discover our articles below.</p>
@@ -13,7 +19,7 @@
         <br>
     @endif
     <div>
-        <div class="grid gap-8 2xl:gap-12 px-8" style="grid-template-columns: 1fr auto minmax(0,1fr)">
+        <div class="grid gap-8 2xl:gap-12 px-8 relative" style="grid-template-columns: 1fr auto minmax(0,1fr)">
             <div class="col-span-full md:col-span-1">
                 <div class="flex-col gap-y-4 w-fit hidden md:flex md:float-right">
                     <div class="flex flex-col gap-y-1">
@@ -88,26 +94,24 @@
                             <svg width="24px" height="24px" viewBox="0 0 24 24" stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M10 14H2" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 10H2" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 6H2" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 18H2" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 20V4M19 20L22 17M19 20L16 17M19 4L22 7M19 4L16 7" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         </button>
                     </div>
-                    @foreach ($data as $article)
-                        <div class="bg-white shadow-md rounded-lg flex flex-col">
-                            <div class="relative rounded-t-[inherit]">
-                                <img src='{{$images[$article['id']]}}' alt='image' class="rounded-t-[inherit] aspect-square object-cover w-full">
-                                <button class="absolute top-2 right-2 bg-white text-slate-800 hover:text-black opacity-80 [&:hover:not(:disabled)]:opacity-100 disabled:opacity-30 p-2 rounded disabled:cursor-not-allowed" title="Add to Cart" onclick="addToCart({{$article}}, this)">
-                                    <svg width="24px" height="24px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor"><path d="M3 6H22L19 16H6L3 6ZM3 6L2.25 3.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9.99219 11H11.9922M13.9922 11H11.9922M11.9922 11V9M11.9922 11V13" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11 19.5C11 20.3284 10.3284 21 9.5 21C8.67157 21 8 20.3284 8 19.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M17 19.5C17 20.3284 16.3284 21 15.5 21C14.6716 21 14 20.3284 14 19.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                                </button>
-                            </div>
-                            <div class="p-2 flex flex-col gap-y-2 grow">
-                                <h3 class="text-lg font-semibold text-slate-800">{{$article['ab_name']}}</h3>
-                                <p class="text-slate-600">{{$article['ab_description']}}</p>
-                                <p class="text-slate-600 self-end mt-auto">{{number_format($article['ab_price'], decimal_separator: ',', thousands_separator: '.')}} €</p>
-                            </div>
+                    <!-- Articles -->
+                    <section id="articles" aria-description="List of articles" class="col-span-full grid grid-cols-[inherit] gap-[inherit]">
+                        <div role="status" class="col-span-full flex justify-center items-center aspect-square">
+                            <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-slate-800" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                            </svg>
+                            <span class="sr-only">Loading...</span>
                         </div>
-                    @endforeach
+                    </section>
                 </div>
             </div>
-            <div>
-                @vite('resources/js/shoppingCart.ts')
+            <div id="shopping-cart">
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    @vite('resources/js/components/articles/articlesOverview.ts')
 @endsection

@@ -1,0 +1,52 @@
+<div id="container">
+    <button id="button">Load message</button>
+    <div id="message"></div>
+</div>
+
+<script>
+    "use strict";
+
+    // Request the file "message.json" and display the content in the div with the id "message"
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", "message.json", true);
+
+    // Define the function to execute when the request is completed
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                // Parse the JSON content
+                let message = JSON.parse(xhr.responseText);
+                // Display the message in the div with the id "message"
+                document.getElementById("message").innerText = message.content;
+            } else {
+                // Display an error message in the div with the id "message"
+                document.getElementById("message").innerText = `An error occurred. Status: ${xhr.status}`;
+            }
+        }
+    };
+
+    // Send the request when the button is clicked
+    document.getElementById("button").addEventListener("click", function() {
+        xhr.send();
+    });
+</script>
+
+<style>
+    #container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
+
+    #message {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        width: 15rem;
+        height: 1rem;
+        text-align: center;
+        border-radius: 0.5rem;
+    }
+</style>

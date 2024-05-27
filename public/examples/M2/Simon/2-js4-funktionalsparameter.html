@@ -1,0 +1,27 @@
+<script>
+    "use strict";
+
+
+    /**
+     * Applies a function to two numbers.
+     * @param {function} func The function to apply.
+     * @param {any} a The first number.
+     * @param {any} b The second number.
+     * @returns {any} The result of applying func to a and b.
+     */
+    function apply(func, a, b) {
+        return func(a, b);
+    }
+
+    /**
+     * Multiplies two numbers.
+     * @param {number} a The first number.
+     * @param {number} b The second number.
+     * @returns {number} The product of a and b.
+     */
+    function multiply(a, b) {
+        return a * b;
+    }
+
+    console.log("apply(multiply, 3, 4) = ", apply(multiply, 3, 4));
+</script>
