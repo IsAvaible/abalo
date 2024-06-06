@@ -145,6 +145,8 @@
     </header>
     @show
 
+    <div id="hello-vue"></div>
+
     <div class="[&>*]:mx-auto [&>*]:w-fit min-h-screen py-3">
         @yield('content')
     </div>
