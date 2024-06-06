@@ -24,7 +24,7 @@ class DevelopmentData extends Seeder
             file($filePath));
 
         // Copy first row of data to $attributes and remove it from $dataMap
-        //  The first row contains the column/attribute names
+        // The first row contains the column/attribute names
         $attributes = array_shift($dataMap);
         // Loop through the data
         foreach ($dataMap as $row) {
@@ -60,7 +60,8 @@ class DevelopmentData extends Seeder
         $tables = [
             "ab_user" => __DIR__ . '/data/user.csv', // __DIR__ is current file's directory
             "ab_article" => __DIR__ . '/data/articles.csv',
-            "ab_articlecategory" => __DIR__ . '/data/articlecategory.csv'
+            "ab_articlecategory" => __DIR__ . '/data/articlecategory.csv',
+            "ab_article_has_articlecategory" => __DIR__ . '/data/article_has_articlecategory.csv',
         ];
 
 
