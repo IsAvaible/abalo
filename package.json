@@ -14,6 +14,8 @@
         "vite": "^5.0"
     },
     "dependencies": {
-        "@tailwindcss/container-queries": "^0.1.1"
+        "@tailwindcss/container-queries": "^0.1.1",
+        "@vitejs/plugin-vue": "^5.0.5",
+        "vue": "^3.4.27"
     }
 }
