@@ -110,7 +110,7 @@
                         </svg>
                     </button>
                     <div id="nav-menu-dialog" role="dialog" class="flex flex-col absolute right-0 bg-white rounded-lg w-fit z-50 opacity-0 transition-opacity pointer-events-none">
-                        @vite(["resources/js/components/NavigationMenu.ts"])
+                        @vite(["resources/js/components/ts/NavigationMenu.ts"])
                     </div>
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
@@ -144,6 +144,8 @@
         </nav>
     </header>
     @show
+
+    <div id="hello-vue"></div>
 
     <div class="[&>*]:mx-auto [&>*]:w-fit min-h-screen py-3">
         @yield('content')
@@ -196,7 +198,7 @@
     </footer>
     @show
 
-    @vite(['resources/js/components/cookieBanner.ts'])
+    @vite(['resources/js/components/ts/cookieBanner.ts'])
 
     @yield('scripts')
 </body>
