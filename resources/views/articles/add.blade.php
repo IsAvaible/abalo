@@ -2,10 +2,6 @@
 
 @section('meta')
     <meta name="csrf-token" id="csrf-token" content="{{ csrf_token() }}">
-    <meta name="old-name" content="{{ old('name') }}">
-    <meta name="old-description" content="{{ old('description') }}">
-    <meta name="old-category" content="{{ old('category') }}">
-    <meta name="old-price" content="{{ old('price') }}">
 @endsection
 
 @section('title', 'Add Article')

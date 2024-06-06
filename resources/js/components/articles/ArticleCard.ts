@@ -1,5 +1,5 @@
-import {addToCart} from "./shoppingCart";
-import {Article} from "./Article";
+import {addToCart} from "../shoppingCart/shoppingCart";
+import Article from "./Article";
 import {formatNumberToEuro} from "../../util/formatNumberToEuro";
 
 const PLACEHOLDER_IMAGE_PATH = "https://via.placeholder.com/300x300";
@@ -44,8 +44,9 @@ export default class ArticleCard implements Article
         const button = document.createElement('button');
         button.className = "absolute top-2 right-2 bg-white text-slate-800 hover:text-black opacity-80 [&:hover:not(:disabled)]:opacity-100 disabled:opacity-30 p-2 rounded disabled:cursor-not-allowed";
         button.title = "Add to Cart";
+        button.dataset.articleId = this.id.toString();
         button.onclick = () => {
-            addToCart(this as Article, button);
+            addToCart(this as Article);
         }
 
         // Create the SVG element for the button
@@ -84,6 +85,10 @@ export default class ArticleCard implements Article
         cardDiv.appendChild(infoDiv);
 
         return cardDiv;
+    }
+
+    set inCart(value: boolean) {
+        this.element.querySelector('button')!.disabled = value;
     }
 
     insertInto(parent: HTMLElement)

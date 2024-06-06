@@ -15,7 +15,7 @@ description.textContent = "Diese Website nutzt externe Inhalte wie Karten und Vi
 
 const link = document.createElement('a');
 link.href = "/datenschutz";
-link.classList.add('text-red-600', 'dark:text-red-500', 'whitespace-nowrap', 'hover:underline');
+link.classList.add('text-blue-700', 'whitespace-nowrap', 'hover:underline');
 link.textContent = "Mehr Erfahren";
 description.appendChild(link);
 
@@ -23,7 +23,7 @@ const buttonsContainer = document.createElement('div');
 buttonsContainer.classList.add('flex', 'gap-4', 'items-center', 'flex-shrink-0');
 
 const declineButton = document.createElement('button');
-declineButton.classList.add('text-red-600', 'dark:text-red-500', 'hover:underline');
+declineButton.classList.add('text-slate-900', 'hover:underline');
 declineButton.textContent = "Ablehnen";
 declineButton.addEventListener('click', () => {
     CookieStore.set(false);
@@ -34,7 +34,7 @@ declineButton.addEventListener('click', () => {
 });
 
 const acceptButton = document.createElement('button');
-acceptButton.classList.add('bg-red-600', 'dark:bg-red-600', 'px-5', 'py-2', 'text-white', 'rounded-md', 'hover:bg-red-700', 'focus:ring-1', 'focus:ring-inset', 'focus:ring-white');
+acceptButton.classList.add('bg-slate-800', 'px-5', 'py-2', 'text-white', 'rounded-md', 'hover:bg-black', 'transition-colors', 'focus:ring-1', 'focus:ring-inset', 'focus:ring-white');
 acceptButton.textContent = "Akzeptieren";
 acceptButton.addEventListener('click', () => {
     CookieStore.set(true);

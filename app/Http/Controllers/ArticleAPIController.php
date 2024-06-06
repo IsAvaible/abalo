@@ -10,35 +10,72 @@ use Illuminate\Support\Facades\Validator;
 
 class ArticleAPIController extends Controller
 {
-    public function index_api(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse
+    {
+        return $this->searchArticles($request);
+    }
+
+    public function searchArticles(Request $request): JsonResponse
     {
         // Validate the request
-//        $validator = Validator::make($request->all(), [
-//            'search' => ['string'],
-//            'limit' => ['numeric', 'min:0'],
-//        ]);
-//        $validator->validate();
+        $validator = Validator::make($request->all(), [
+            'search' => ['string'],
+            'limit' => ['numeric', 'min:0'],
+            'articleIDs' => ['array'],
+            'articleIDs.*' => ['numeric', 'exists:ab_article,id'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors(), 'request' => $request->all()], 400);
+        }
 
         // Get the query parameters
-        $search = $request->query('search');
-        $limit = $request->query('limit');
+        $search = $request->input('search'); // Search query
+        $limit = $request->input('limit'); // Limit of articles
+        $articleIDs = $request->input('articleIDs'); // Array of article IDs
 
         // Get the matching articles
-        $articles = Article::whereRaw('LOWER(ab_name) LIKE ?', '%' . strtolower($search) . '%')->limit($limit)->get();
+        $articles = Article::where('ab_name', 'ilike', '%'.$search.'%')->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL)->limit($limit)->get();
 
         // Add the image path to each article
         foreach ($articles as $article) {
-            $article['imagePath'] = ArticleAPIController::findImage_api($article['id']);
+            $article['imagePath'] = ArticleAPIController::findImage($article['id']);
         }
 
         // Respond with the articles
-        return response()->json(['search' => $search, 'limit' => $limit, 'articles' => $articles]);
+        return response()->json(['request' => $request->all(), 'articles' => $articles]);
+    }
+
+    /**
+     * Get a specific article by ID
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getArticle(Request $request): JsonResponse
+    {
+        // Merge the article ID into the request
+        $request->merge(['articleId' => $request->route('articleId')]);
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'articleId' => ['required', 'numeric', 'exists:ab_article,id'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        $article = Article::find($request->route('articleId'));
+
+        // Add the image path to the article
+        $article['imagePath'] = ArticleAPIController::findImage($article['id']);
+
+        // Respond with the article
+        return response()->json(['article' => $article]);
     }
 
     /**
      * Store a newly created article in storage.
      */
-    public function store_api(Request $request): JsonResponse
+    public function storeArticle(Request $request): JsonResponse
     {
         // Validate the request
         $validator = Validator::make($request->all(), [
@@ -73,7 +110,7 @@ class ArticleAPIController extends Controller
      * @param int $articleID The article ID
      * @return string|null The image path or NULL if not found
      */
-    public function findImage_api(int $articleID): ?string
+    public function findImage(int $articleID): ?string
     {
         // Get the path to the images directory
         $dir = public_path("images");

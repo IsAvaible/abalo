@@ -1,7 +1,7 @@
 /**
  * Interface for the article object
  */
-export interface Article {
+export default interface Article {
     id: number;
     ab_name: string;
     ab_price: number;

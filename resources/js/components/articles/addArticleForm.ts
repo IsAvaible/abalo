@@ -3,7 +3,7 @@ const form = document.createElement('form');
 form.classList.add('grid', 'grid-cols-2', 'items-center', 'gap-x-3', 'gap-y-3', 'my-6', 'dark:bg-slate-800', 'p-6', 'rounded-md', 'shadow-md', 'dark:shadow-none', 'border', 'border-slate-200', 'dark:border-slate-900', 'dark:text-white', 'text-black');
 form.style.gridTemplateColumns = 'auto 1fr';
 form.method = 'POST';
-form.action = '/articles';
+form.action = '/api/articles';
 form.enctype = 'multipart/form-data';
 
 // Create the input fields
@@ -64,6 +64,7 @@ form.addEventListener('submit', async (event) => {
 
     // Get the form data
     const formData = new FormData(form);
+    formData.set('price', Math.round((parseFloat(formData.get('price') as string)) * 100) + ''); // Convert the price to cents
 
     // Prepare the xhr request
     const xhr = new XMLHttpRequest();
@@ -135,7 +136,6 @@ function createInputField(type: string, label: string, placeholder: string, name
         input = document.createElement('input');
         input.type = type;
         input.placeholder = placeholder;
-        input.id = id;
     }
 
     labelElm.textContent = label;

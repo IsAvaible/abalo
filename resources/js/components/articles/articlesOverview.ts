@@ -1,6 +1,6 @@
 import ArticleShowcase from './articleShowcase';
 import ArticleCard from "./ArticleCard";
-import { Article } from './Article';
+import Article from './Article';
 
 const articleShowcase = new ArticleShowcase('articles');
 const searchForm = document.getElementById('search-form') as HTMLFormElement;
@@ -11,7 +11,7 @@ const searchInput = document.getElementById('search-input') as HTMLInputElement;
  */
 const init = () => {
     // Initialize the showcase
-    update("/api/articles" + window.location.search);
+    update("/api/articles/search" + window.location.search);
 
     // Add an event listener to the search form
     searchForm.addEventListener('submit', (event) => {
@@ -30,7 +30,7 @@ const init = () => {
 
         // Update the history and request the new data
         window.history.pushState({}, '', url.pathname + url.search);
-        update("/api/articles" + url.search);
+        update("/api/articles/search" + url.search);
     });
 }
 
@@ -54,7 +54,7 @@ const update = (url: string | URL) => {
             } else {
                 // Log the error
                 articleShowcase.htmlElement.innerHTML = '<div class="alert alert-danger">An error occurred while loading the articles</div>';
-                console.error(xhr.statusText);
+                console.error(JSON.parse(xhr.responseText), xhr);
             }
         }
     };
