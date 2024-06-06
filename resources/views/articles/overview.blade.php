@@ -113,5 +113,5 @@
 @endsection
 
 @section('scripts')
-    @vite('resources/js/components/articles/articlesOverview.ts')
+    @vite('resources/js/components/ts/articles/articlesOverview.ts')
 @endsection

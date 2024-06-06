@@ -1,4 +1,4 @@
-import {formatNumberToEuro} from "../../util/formatNumberToEuro";
+import {formatNumberToEuro} from "../../../util/formatNumberToEuro";
 import Article from "../articles/Article";
 
 // Create the shopping cart button
