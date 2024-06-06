@@ -17,6 +17,8 @@ Route::get('/articles/search', [App\Http\Controllers\ArticleAPIController::class
 Route::post('/articles/search', [App\Http\Controllers\ArticleAPIController::class, 'searchArticles'])->name('api.articles.searchPOST');
 // Add an article
 Route::post('/articles', [App\Http\Controllers\ArticleAPIController::class, 'storeArticle'])->name('api.articles.storeArticle');
+// Get all categories
+Route::get('/articles/categories', [App\Http\Controllers\ArticleAPIController::class, 'getArticleCategories'])->name('api.articles.categories');
 
 
 /// M3-A10

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\ArticleCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -20,6 +21,7 @@ class ArticleAPIController extends Controller
         // Validate the request
         $validator = Validator::make($request->all(), [
             'search' => ['string'],
+            'category' => ['string'],
             'limit' => ['numeric', 'min:0'],
             'articleIDs' => ['array'],
             'articleIDs.*' => ['numeric', 'exists:ab_article,id'],
@@ -30,11 +32,19 @@ class ArticleAPIController extends Controller
 
         // Get the query parameters
         $search = $request->input('search'); // Search query
+        $category = $request->input('category'); // Category filter
         $limit = $request->input('limit'); // Limit of articles
         $articleIDs = $request->input('articleIDs'); // Array of article IDs
 
         // Get the matching articles
-        $articles = Article::where('ab_name', 'ilike', '%'.$search.'%')->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL)->limit($limit)->get();
+        $articles = Article::
+            where('ab_name', 'ilike', '%'.$search.'%')
+            ->whereHas('categories', function ($query) use ($category) {
+                $query->where('ab_name', 'ilike', '%'.$category.'%');
+            })
+            ->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL)
+            ->limit($limit)
+            ->get();
 
         // Add the image path to each article
         foreach ($articles as $article) {
@@ -103,6 +113,18 @@ class ArticleAPIController extends Controller
 
         // Respond with success message
         return response()->json(['message' => 'Article created successfully', 'id' => $article->id], 201);
+    }
+
+    /**
+     * Get all categories
+     */
+    public function getArticleCategories(Request $request): JsonResponse
+    {
+        // Get all categories
+        $categories = ArticleCategory::all();
+
+        // Respond with the categories
+        return response()->json(['categories' => $categories]);
     }
 
     /**

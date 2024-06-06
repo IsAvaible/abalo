@@ -23,7 +23,7 @@ const doSearch = async (autoSearch: boolean) => {
     if (autoSearch && 0 < search.value.length && search.value.length < 3) return;
     searching.value = true;
     // Build the new URL
-    const url = new URL(window.location.href + window.location.search);
+    const url = new URL(window.location.href);
     if (search.value !== '') {
         url.searchParams.set('search',  search.value);
     } else {

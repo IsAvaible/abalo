@@ -33,8 +33,7 @@
                 </a>
 
                 @verbatim
-                <div id="VUE-search-bar">
-                </div>
+                <div id="VUE-search-bar"></div>
                 @endverbatim
 
                 <a href="#" class="hover:scale-110 transition-transform">
@@ -100,7 +99,9 @@
     </header>
     @show
 
+    @verbatim
     <div id="hello-vue"></div>
+    @endverbatim
 
     <div class="[&>*]:mx-auto [&>*]:w-fit min-h-screen py-3">
         @yield('content')
