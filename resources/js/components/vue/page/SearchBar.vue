@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import {onMounted, ref, toRefs, watch} from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import {debounce} from 'vue-debounce';
 import {update} from "@/components/ts/articles/articlesOverview";
 
 // Props
-const props = defineProps<{ search: string }>();
-const { search: searchProp } = toRefs(props);
-const search = ref<string>(searchProp.value ?? '');
+const search = ref<string>(new URLSearchParams(window.location.search).get('search') ?? '');
 
 // Refs
 const input = ref<HTMLInputElement | null>(null);

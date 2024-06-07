@@ -16,6 +16,7 @@
     "dependencies": {
         "@tailwindcss/container-queries": "^0.1.1",
         "@vitejs/plugin-vue": "^5.0.5",
+        "primevue": "^3.52.0",
         "vue": "^3.4.27",
         "vue-debounce": "^5.0.0"
     }

@@ -22,6 +22,8 @@ class ArticleAPIController extends Controller
         $validator = Validator::make($request->all(), [
             'search' => ['string'],
             'category' => ['string'],
+            'price_min' => ['numeric', 'min:0'],
+            'price_max' => ['numeric', 'min:0'],
             'limit' => ['numeric', 'min:0'],
             'articleIDs' => ['array'],
             'articleIDs.*' => ['numeric', 'exists:ab_article,id'],
@@ -42,6 +44,8 @@ class ArticleAPIController extends Controller
             ->whereHas('categories', function ($query) use ($category) {
                 $query->where('ab_name', 'ilike', '%'.$category.'%');
             })
+            ->where('ab_price', '>=', $request->input('price_min') ?? 0)
+            ->where('ab_price', '<=', $request->input('price_max') ?? 999999999)
             ->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL)
             ->limit($limit)
             ->get();
