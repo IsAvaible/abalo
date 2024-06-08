@@ -16,6 +16,7 @@
 </head>
 
 <body>
+<div id="app">
     @section('page')
     <header class="w-full p-6">
         <nav class="mx-auto grid grid-cols-3 max-w-5xl">
@@ -32,9 +33,7 @@
                     Home
                 </a>
 
-                @verbatim
-                <div id="VUE-search-bar"></div>
-                @endverbatim
+                <search-bar search="{{$search}}"></search-bar>
 
                 <a href="#" class="hover:scale-110 transition-transform">
                     <!-- Heart Icon -->
@@ -63,36 +62,7 @@
                             <path class="rounded-full transition group-focus-within:-rotate-45 group-focus-within:translate-y-1 group-focus-within:-translate-x-[0.16rem] group-focus-within:scale-x-75 duration-300" d="M3 19H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                     </button>
-                    <div id="nav-menu-dialog" role="dialog" class="flex flex-col absolute right-0 bg-white rounded-lg w-fit z-50 opacity-0 transition-opacity pointer-events-none">
-                        @vite(["resources/js/components/ts/NavigationMenu.ts"])
-                    </div>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const navMenuDialog = document.getElementById('nav-menu-dialog');
-                            const hamburgerButton = document.getElementById('hamburger-button');
-                            const container = hamburgerButton.parentElement;
-                            let isOpen = false;
-
-                            const toggleDialog = () => {
-                                container.classList.toggle('group');
-                                navMenuDialog.classList.toggle('opacity-0');
-                                navMenuDialog.classList.toggle('pointer-events-none');
-                                isOpen = !isOpen;
-                            };
-
-                            hamburgerButton.addEventListener('click', () => {
-                                toggleDialog()
-
-                                document.addEventListener('click', (event) => {
-                                    if (isOpen && !navMenuDialog.contains(event.target) && !hamburgerButton.contains(event.target)) {
-                                        toggleDialog();
-                                        // Remove the event listener
-                                        document.removeEventListener('click', arguments.callee);
-                                    }
-                                });
-                            });
-                        });
-                    </script>
+                    <div id="nav-menu-dialog" role="dialog" class="flex flex-col absolute right-0 bg-white rounded-lg w-fit z-50 opacity-0 transition-opacity pointer-events-none"></div>
                 </div>
             </div>
         </nav>
@@ -153,10 +123,12 @@
         </div>
     </footer>
     @show
+</div>
 
-    @vite(['resources/js/components/ts/cookieBanner.ts'])
+@yield('scripts')
+@vite('resources/js/components/ts/NavigationMenu.ts')
+@vite('resources/js//components/ts/cookieBanner.ts')
 
-    @yield('scripts')
 </body>
 </html>
 

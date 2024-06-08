@@ -4,7 +4,14 @@ import {debounce} from 'vue-debounce';
 import {update} from "@/components/ts/articles/articlesOverview";
 
 // Props
-const search = ref<string>(new URLSearchParams(window.location.search).get('search') ?? '');
+const props = defineProps({
+    search: {
+        type: String,
+        required: false,
+    },
+});
+
+const search = ref<string>(props.search ?? '');
 
 // Refs
 const input = ref<HTMLInputElement | null>(null);
@@ -14,6 +21,7 @@ const searching = ref<boolean>(false);
 // Lifecycle Hooks
 onMounted(() => {
     if (search.value.length > 11) input.value.setAttribute('data-rtl', '');
+    input.value.classList.add('transition-[padding,margin,box-shadow]');
 });
 
 // Search Functionality
@@ -52,7 +60,6 @@ const handleFormFocusIn = () => {
 };
 
 const handleFormFocusOut = (event: FocusEvent) => {
-    console.log(event.relatedTarget, form.value.contains(event.relatedTarget as Node));
     if (!form.value.contains(event.relatedTarget as Node) && !input.value.hasAttribute('data-rtl')) {
         setTimeout(() => {
             input.value.setAttribute('data-rtl', '');
@@ -67,7 +74,7 @@ const handleFormFocusOut = (event: FocusEvent) => {
         ref="form"
         action="/articles"
         novalidate
-        class="group relative flex flex-row -mr-4 gap-x-2 items-center rounded-full py-1 hover:ring-opacity-100 focus-within:ring-opacity-100 has-[input:not(:placeholder-shown)]:ring-opacity-100 hover:px-4 focus-within:px-4 has-[input:not(:placeholder-shown)]:px-4 hover:mr-0 focus-within:mr-0 has-[input:not(:placeholder-shown)]:mr-0 ring-1 ring-slate-800 ring-opacity-0 transition-[padding,margin,box-shadow] duration-500"
+        class="group relative flex flex-row -mr-4 gap-x-2 items-center rounded-full py-1 hover:ring-opacity-100 focus-within:ring-opacity-100 has-[input:not(:placeholder-shown)]:ring-opacity-100 hover:px-4 focus-within:px-4 has-[input:not(:placeholder-shown)]:px-4 hover:mr-0 focus-within:mr-0 has-[input:not(:placeholder-shown)]:mr-0 ring-1 ring-slate-800 ring-opacity-0 duration-500"
         @focusin="handleFormFocusIn"
         @focusout="handleFormFocusOut"
         @submit.prevent="() => doSearch(false)"

@@ -21,9 +21,7 @@
     <div>
         <div class="grid gap-8 2xl:gap-12 px-8 relative" style="grid-template-columns: 1fr auto minmax(0,1fr)">
             <div class="col-span-full md:col-span-1">
-                @verbatim
-                <div id="VUE-article-filter-form"></div>
-                @endverbatim
+                <article-filter-form categories='@json($categories)' selected-categories="{{$selectedCategories}}" price-min="{{$priceMin}}" price-max="{{$priceMax}}">></article-filter-form>
             </div>
             <div class="col-span-full md:col-span-1 max-w-5xl">
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-6">

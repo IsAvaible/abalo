@@ -21,7 +21,7 @@ class ArticleAPIController extends Controller
         // Validate the request
         $validator = Validator::make($request->all(), [
             'search' => ['string'],
-            'category' => ['string'],
+            'categories' => ['string'],
             'price_min' => ['numeric', 'min:0'],
             'price_max' => ['numeric', 'min:0'],
             'limit' => ['numeric', 'min:0'],
@@ -34,15 +34,15 @@ class ArticleAPIController extends Controller
 
         // Get the query parameters
         $search = $request->input('search'); // Search query
-        $category = $request->input('category'); // Category filter
+        $categories = $request->input('categories') ? json_decode('['.str_replace('-', ',',$request->input('categories')).']') : null; // Categories filter
         $limit = $request->input('limit'); // Limit of articles
         $articleIDs = $request->input('articleIDs'); // Array of article IDs
 
         // Get the matching articles
         $articles = Article::
             where('ab_name', 'ilike', '%'.$search.'%')
-            ->whereHas('categories', function ($query) use ($category) {
-                $query->where('ab_name', 'ilike', '%'.$category.'%');
+            ->whereHas('categories', function ($query) use ($categories) {
+                $query->whereIn('ab_articlecategory.id', $categories ?? [], 'and', $categories === NULL);
             })
             ->where('ab_price', '>=', $request->input('price_min') ?? 0)
             ->where('ab_price', '<=', $request->input('price_max') ?? 999999999)

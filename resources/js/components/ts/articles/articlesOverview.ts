@@ -31,7 +31,7 @@ export const update = async (url: string | URL) => {
         articleShowcase.render();
     } catch (error) {
         // Handle the error
-        articleShowcase.htmlElement.innerHTML = '<div class="alert alert-danger">An error occurred while loading the articles</div>';
+        document.getElementById(articleShowcase.htmlElementID)!.innerHTML = '<div class="alert alert-danger">An error occurred while loading the articles</div>';
         console.error(error.response ? error.response.data : error.message, error);
     }
 };
