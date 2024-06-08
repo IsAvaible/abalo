@@ -28,7 +28,7 @@
                     <!-- Filters -->
                     <div class="flex flex-row gap-2 flex-wrap col-span-full">
                         <button class="bg-slate-700 text-white font-bold py-2 px-4 rounded" onclick="filterArticles('')">All</button>
-                        @foreach (['Good & Used', 'Cars', '200-1000 €', 'Free & Standard', 'Germany'] as $filter)
+                        @foreach (['Good & Used', 'Cars', '200-1000 €', 'Free & Standard'] as $filter)
                             <button class="bg-slate-100 font-semibold py-2 px-4 rounded group relative hover:bg-slate-200 overflow-hidden" onclick="removeFilter('{{$filter}}')">
                                 <span>{{$filter}}</span>
                                 <span class="absolute left-0 top-0 hidden group-hover:flex p-[inherit] bg-inherit w-full h-full">
@@ -38,16 +38,7 @@
                             </button>
                         @endforeach
                         <!-- Sort -->
-                        <select class="max-lg:hidden bg-white text-slate-800 border border-slate-300 rounded p-2 h-fit ml-auto" title="Sort articles" onchange="sortArticles(this)">
-                            <option value="price_asc">Price Ascending</option>
-                            <option value="price_desc" selected>Price Descending</option>
-                            <option value="name_asc">Name Ascending</option>
-                            <option value="name_desc">Name Descending</option>
-                        </select>
-                        <button class="lg:hidden bg-white text-slate-800 border border-slate-300 rounded p-2 h-fit" title="Sort articles" onclick="displaySortDialog()">
-                            <!-- Sort Icon -->
-                            <svg width="24px" height="24px" viewBox="0 0 24 24" stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M10 14H2" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 10H2" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 6H2" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 18H2" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 20V4M19 20L22 17M19 20L16 17M19 4L22 7M19 4L16 7" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                        </button>
+                        <sort-option-dropdown selected-sorting-option="{{$sortBy}}"></sort-option-dropdown>
                     </div>
                     <!-- Articles -->
                     <section id="articles" aria-description="List of articles" class="col-span-full grid grid-cols-[inherit] gap-[inherit]">

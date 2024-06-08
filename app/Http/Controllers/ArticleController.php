@@ -63,6 +63,7 @@ class ArticleController extends Controller
             'selectedCategories' => $request->query('categories'),
             'priceMin' => $request->query('price_min'),
             'priceMax' => $request->query('price_max'),
+            'sortBy' => $request->query('sort_by'),
         ]);
     }
 
