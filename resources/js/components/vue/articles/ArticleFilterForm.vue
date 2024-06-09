@@ -58,9 +58,14 @@ const selectedConditions = ref();
 
 const categories = ref<ArticleCategory[]>(JSON.parse(props.categories))
 const selectedCategories = ref<ArticleCategory[]>(categories.value.filter(category => props.selectedCategories && JSON.parse(`[${props.selectedCategories.replace(/-/g,',')}]`).includes(category.id)));
-const categoryNodes = ref<TreeNode[]>(buildCategoryTree(categories.value));
+const [nodes, map] = buildCategoryTree(categories.value);
+const categoryNodes = ref<TreeNode[]>(nodes);
+// Create a map of the selected categories
 const selectedCategoryNodes = ref<{[key: number] : boolean}>(selectedCategories.value.reduce((acc, category) => {
-    acc[category.id] = {checked: true, partialChecked: false}
+    // Check if the category is partially checked
+    const partialChecked = Object.values(map).find(node => parseInt(node.key) === category.id)?.children.some(child => !selectedCategories.value.map(category => category.id).includes(parseInt(child.key)));
+    // Add the category to the selectedCategoryNodes object
+    acc[category.id] = {checked: !partialChecked, partialChecked: partialChecked};
     return acc;
 }, {}))
 
@@ -141,7 +146,7 @@ async function handleReset() {
  *
  * @returns The root categories
  */
-function buildCategoryTree(categories: TreeNode[]): TreeNode[] {
+function buildCategoryTree(categories: TreeNode[]): [TreeNode[], {[key: number]: TreeNode}] {
     const map = {};
     const roots = [];
 
@@ -164,7 +169,7 @@ function buildCategoryTree(categories: TreeNode[]): TreeNode[] {
         }
     });
 
-    return roots;
+    return [roots, map];
 }
 </script>
 
@@ -205,10 +210,7 @@ function buildCategoryTree(categories: TreeNode[]): TreeNode[] {
             <h4 class="text-lg font-semibold text-slate-700">Price Range</h4>
             <div class="flex flex-row gap-x-2 items-center">
                 <InputGroup>
-                    <FloatLabel>
-                        <InputNumber id="price-min-input" placeholder="" v-model="priceRange.min" @update:model-value="handleFormFieldChange" :max-fraction-digits="2" :min-fraction-digits="2" :min="0"/>
-                        <label for="price-min-input">Min</label>
-                    </FloatLabel>
+                    <InputNumber id="price-min-input" placeholder="Min" v-model="priceRange.min" @update:model-value="handleFormFieldChange" :max-fraction-digits="2" :min-fraction-digits="2" :min="0"/>
                     <InputGroupAddon>€</InputGroupAddon>
                 </InputGroup>
                 <span> - </span>
@@ -268,7 +270,7 @@ function buildCategoryTree(categories: TreeNode[]): TreeNode[] {
         <!-- Loading Spinner -->
         <Transition name="fade">
             <svg
-                v-if="loading"
+                v-show="loading"
                 aria-hidden="true"
                 class="w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-slate-800 mx-auto mt-4"
                 viewBox="0 0 100 101"
