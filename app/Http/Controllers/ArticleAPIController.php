@@ -39,26 +39,31 @@ class ArticleAPIController extends Controller
         $limit = $request->input('limit'); // Limit of articles
         $sortBy = $request->input('sort_by'); // Sorting option
         $articleIDs = $request->input('articleIDs'); // Array of article IDs
+        $priceMin = $request->input('price_min'); // Minimum price
+        $priceMax = $request->input('price_max'); // Maximum price
 
         // Get the matching articles
-        $articles = Article::
+        $query = Article::
             where('ab_name', 'ilike', '%'.$search.'%')
             ->whereHas('categories', function ($query) use ($categories) {
                 $query->whereIn('ab_articlecategory.id', $categories ?? [], 'and', $categories === NULL);
-            })
-            ->where('ab_price', '>=', $request->input('price_min') ?? 0)
-            ->where('ab_price', '<=', $request->input('price_max') ?? 999999999)
-            ->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL)
+            });
+            if ($request->input('price_min')) {
+                $query->where('ab_price', '>=', (int) ($priceMin * 100));
+            }
+            if ($request->input('price_max')) {
+                $query->where('ab_price', '<=', (int) ($priceMax * 100));
+            }
+            $query->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL)
             ->limit($limit);
             if ($sortBy) {
                 if ($sortBy == 'price_asc' || $sortBy == 'price_desc') {
-                    $articles->orderBy('ab_price', $sortBy == 'price_asc' ? 'asc' : 'desc');
+                    $query->orderBy('ab_price', $sortBy == 'price_asc' ? 'asc' : 'desc');
                 } else {
-                    $articles->orderBy('ab_name', $sortBy == 'name_asc' ? 'asc' : 'desc');
+                    $query->orderBy('ab_name', $sortBy == 'name_asc' ? 'asc' : 'desc');
                 }
             }
-
-        $articles = $articles->get();
+        $articles = $query->get();
 
         // Add the image path to each article
         foreach ($articles as $article) {
@@ -66,7 +71,7 @@ class ArticleAPIController extends Controller
         }
 
         // Respond with the articles
-        return response()->json(['request' => $request->all(), 'articles' => $articles]);
+        return response()->json(['request' => $query->toSql(), 'articles' => $articles]);
     }
 
     /**
