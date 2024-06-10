@@ -23,7 +23,7 @@
             <div>
                 <a href="/" class="flex flex-row gap-x-2 items-center text-2xl font-bold text-slate-800">
                     <img src="https://tailwindui.com/img/logos/mark.svg?color=black" alt="Logo" class="h-8">
-                    Abalo
+                    <span class="max-sm:hidden">Abalo</span>
                 </a>
             </div>
             <div class="flex flex-row justify-center items-center gap-x-6 max-sm:[&>*:not(:nth-child(2))]:hidden">
@@ -33,7 +33,7 @@
                     Home
                 </a>
 
-                <search-bar search="{{$search}}"></search-bar>
+                <search-bar @isset($search) search="{{$search}}" @endisset></search-bar>
 
                 <a href="#" class="hover:scale-110 transition-transform">
                     <!-- Heart Icon -->
@@ -79,7 +79,7 @@
 
     @section('footer')
     <footer class="relative bottom-0 w-full bg-slate-800 p-8 text-slate-100 mt-auto">
-        <div class="flex flex-row gap-x-4 mx-auto w-fit">
+        <div class="flex flex-row gap-x-4 mx-auto w-fit flex-wrap gap-y-2">
             <button class="bg-slate-700 hover:ring-1 ring-slate-200 text-white font-semibold py-2 px-4 rounded">
                 Help
             </button>
@@ -92,7 +92,7 @@
             <button class="bg-slate-700 hover:ring-1 ring-slate-200 text-white font-semibold py-2 px-4 rounded">
                 Returns
             </button>
-            <a class="bg-blue-600 hover:ring-1 ring-slate-200 text-white font-bold py-2 px-4 rounded" href="{{ route('articles.add') }}">Add Article</a>
+            <a class="bg-blue-600 hover:ring-1 ring-slate-200 text-white font-bold py-2 px-4 rounded" href="/articles/add">Add Article</a>
         </div>
         <br>
         <div class="grid grid-cols-2 md:grid-cols-3 max-w-5xl mx-auto justify-items-center">

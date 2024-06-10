@@ -18,27 +18,29 @@
         </div>
         <br>
     @endif
-    <div>
-        <div class="grid gap-8 2xl:gap-12 px-8 relative" style="grid-template-columns: 1fr auto minmax(0,1fr)">
+    <div class="w-full">
+        <div class="grid gap-8 2xl:gap-12 px-8 relative w-full" style="grid-template-columns: 1fr auto minmax(0,1fr)">
             <div class="col-span-full md:col-span-1">
-                <article-filter-form categories='@json($categories)' selected-categories="{{$selectedCategories}}" price-min="{{$priceMin}}" price-max="{{$priceMax}}">></article-filter-form>
+                <component :is="isMobile ? 'Dialog' : 'AppLayout'" v-model:visible="filterDialogVisible" modal header="Configure Filters">
+                    <article-filter-form @verbatim v-on:filter-chips="chips => filterChips = chips" @endverbatim
+                                         categories='@json($categories)'
+                                         selected-categories="{{$selectedCategories}}"
+                                         @if($priceMin) :price-min="{{$priceMin}}" @endif
+                                         @if($priceMax) :price-max="{{$priceMax}}" @endif
+                    ></article-filter-form>
+                </component>
             </div>
             <div class="col-span-full md:col-span-1 max-w-5xl">
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Filters -->
-                    <div class="flex flex-row gap-2 flex-wrap col-span-full">
-                        <button class="bg-slate-700 text-white font-bold py-2 px-4 rounded" onclick="filterArticles('')">All</button>
-                        @foreach (['Good & Used', 'Cars', '200-1000 €', 'Free & Standard'] as $filter)
-                            <button class="bg-slate-100 font-semibold py-2 px-4 rounded group relative hover:bg-slate-200 overflow-hidden" onclick="removeFilter('{{$filter}}')">
-                                <span>{{$filter}}</span>
-                                <span class="absolute left-0 top-0 hidden group-hover:flex p-[inherit] bg-inherit w-full h-full">
-                                    <span class="truncate">{{$filter}}</span>
-                                    <span class="text-nowrap ml-1">X</span>
-                                </span>
-                            </button>
-                        @endforeach
+                    <div class="flex flex-row gap-2 max-w-5xl:flex-wrap col-span-full">
+                        <!-- Filter Chips -->
+                        <filter-chips :filters="filterChips"></filter-chips>
+                        <!-- Filter Button -->
+                        <button @click="() => filterDialogVisible = isMobile" class="md:hidden ml-auto bg-white text-slate-800 border border-slate-300 rounded p-2 aspect-square">
+                            <svg width="24px" height="24px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M3.99961 3H19.9997C20.552 3 20.9997 3.44764 20.9997 3.99987L20.9999 5.58569C21 5.85097 20.8946 6.10538 20.707 6.29295L14.2925 12.7071C14.105 12.8946 13.9996 13.149 13.9996 13.4142L13.9996 19.7192C13.9996 20.3698 13.3882 20.8472 12.7571 20.6894L10.7571 20.1894C10.3119 20.0781 9.99961 19.6781 9.99961 19.2192L9.99961 13.4142C9.99961 13.149 9.89425 12.8946 9.70672 12.7071L3.2925 6.29289C3.10496 6.10536 2.99961 5.851 2.99961 5.58579V4C2.99961 3.44772 3.44732 3 3.99961 3Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        </button>
                         <!-- Sort -->
-                        <sort-option-dropdown selected-sorting-option="{{$sortBy}}"></sort-option-dropdown>
+                        <sort-option-dropdown class="md:ml-auto" selected-sorting-option="{{$sortBy}}"></sort-option-dropdown>
                     </div>
                     <!-- Articles -->
                     <section id="articles" aria-description="List of articles" class="col-span-full grid grid-cols-[inherit] gap-[inherit]">

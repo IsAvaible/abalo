@@ -8,6 +8,7 @@ const props = defineProps({
     search: {
         type: String,
         required: false,
+        default: null,
     },
 });
 
@@ -74,7 +75,7 @@ const handleFormFocusOut = (event: FocusEvent) => {
         ref="form"
         action="/articles"
         novalidate
-        class="group relative flex flex-row -mr-4 gap-x-2 items-center rounded-full py-1 hover:ring-opacity-100 focus-within:ring-opacity-100 has-[input:not(:placeholder-shown)]:ring-opacity-100 hover:px-4 focus-within:px-4 has-[input:not(:placeholder-shown)]:px-4 hover:mr-0 focus-within:mr-0 has-[input:not(:placeholder-shown)]:mr-0 ring-1 ring-slate-800 ring-opacity-0 duration-500"
+        class="group relative flex flex-row max-w-full -mr-4 gap-x-2 items-center rounded-full py-1 max-sm:ring-opacity-100 hover:ring-opacity-100 focus-within:ring-opacity-100 has-[input:not(:placeholder-shown)]:ring-opacity-100 max-sm:px-4 hover:px-4 focus-within:px-4 has-[input:not(:placeholder-shown)]:px-4 max-sm:mr-0 hover:mr-0 focus-within:mr-0 has-[input:not(:placeholder-shown)]:mr-0 ring-1 ring-slate-800 ring-opacity-0 duration-500"
         @focusin="handleFormFocusIn"
         @focusout="handleFormFocusOut"
         @submit.prevent="() => doSearch(false)"
@@ -118,7 +119,7 @@ const handleFormFocusOut = (event: FocusEvent) => {
             v-model="search"
             placeholder="Search"
             pattern=".{0,11}"
-            class="peer flex bg-[inherit] text-[inherit] [&[data-rtl]:not(:valid)]:[direction:rtl] [&:not(:placeholder-shown)]:truncate w-0 [&:not(:placeholder-shown)]:w-[10ch] group-focus-within:w-40 group-hover:placeholder-shown:w-40 focus:outline-none transition-[width] duration-[inherit]"
+            class="peer flex bg-[inherit] text-[inherit] [&[data-rtl]:not(:valid)]:[direction:rtl] [&:not(:placeholder-shown)]:truncate w-40 sm:w-0 [&:not(:placeholder-shown)]:w-[10ch] group-focus-within:w-40 group-hover:placeholder-shown:w-40 focus:outline-none transition-[width] duration-[inherit]"
         />
         <button
             :tabindex="search.length ? 0 : -1"
