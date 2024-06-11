@@ -12,7 +12,7 @@
     @vite(['resources/js/components/ts/articles/addArticleForm.ts'])
     <div id="article-form"></div>
     @if ($errors->any())
-        <div class="alert alert-danger">
+        <div class="alert alert-error">
             <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>

@@ -19,28 +19,16 @@ const props = defineProps({
     categories: {
         type: String,
         required: true,
-    },
-    selectedCategories: {
-        type: String,
-        required: false,
-        default: '',
-    },
-    priceMin: {
-        type: Number,
-        required: false,
-        default: null,
-    },
-    priceMax: {
-        type: Number,
-        required: false,
-        default: null,
-    },
+    }
 });
 
 // Define Emits
 const emit = defineEmits({
     filterChips: (_: {filters: Filter[], clearAll: () => void}) => true
 });
+
+// Get search URL params
+const urlParams = new URLSearchParams(window.location.search);
 
 /**
  * Interface for the article object
@@ -52,7 +40,9 @@ export interface ArticleCategory {
     ab_parent: ArticleCategory['id'];
 }
 
+// Define reactive variables
 const loading = ref(false);
+const error = ref<string | null>();
 
 const conditions = {
     new: 'New',
@@ -60,10 +50,10 @@ const conditions = {
     good: 'Good',
     used: 'Used',
 };
-const selectedConditions = ref();
+const selectedConditions = ref(parseStringQueryArray(urlParams.get('conditions')));
 
 const categories = ref<ArticleCategory[]>(JSON.parse(props.categories))
-const selectedCategories = ref<ArticleCategory[]>(categories.value.filter(category => props.selectedCategories && JSON.parse(`[${props.selectedCategories.replace(/-/g,',')}]`).includes(category.id)));
+const selectedCategories = ref<ArticleCategory[]>(categories.value.filter(category => urlParams.get('categories') && parseNumberQueryArray(urlParams.get('categories')).includes(category.id)));
 const [nodes, map] = buildCategoryTree(categories.value);
 const categoryNodes = ref<TreeNode[]>(nodes);
 // Create a map of the selected categories
@@ -82,14 +72,13 @@ watch(selectedCategoryNodes, () => {
 const categorySelect = ref();
 
 const priceRange = ref({
-    min: +props.priceMin || null,
-    max: +props.priceMax || null,
+    min: +urlParams.get('price_min') || null,
+    max: +urlParams.get('price_max') || null,
 });
 
 const shippingOptions = {free: 'Free', express: 'Express', standard: 'Standard'};
-const selectedShippingOptions = ref();
+const selectedShippingOptions = ref(parseStringQueryArray(urlParams.get('shipping')));
 
-const selectedCountries = ref();
 const countries = ref([
     { name: 'Australia', code: 'AU' },
     { name: 'Brazil', code: 'BR' },
@@ -102,6 +91,8 @@ const countries = ref([
     { name: 'Spain', code: 'ES' },
     { name: 'United States', code: 'US' }
 ]);
+const selectedCountries = ref(countries.value.filter(country => (parseStringQueryArray(urlParams.get('countries'))).includes(country.code)));
+
 
 emit('filterChips', {filters: buildFilterChips(), clearAll: handleReset});
 
@@ -111,8 +102,14 @@ const handleFormFieldChange = debounce(async () => {
 
 const filterArticles = async () => {
     loading.value = true;
+    error.value = null;
     // Build the new URL
     const url = new URL(window.location.href);
+    if (selectedConditions.value.length > 0) {
+        url.searchParams.set('conditions', selectedConditions.value.join('-'));
+    } else {
+        url.searchParams.delete('conditions');
+    }
     if (selectedCategories.value.length > 0) {
         url.searchParams.set('categories', selectedCategories.value.map(category => category.id).join('-'));
     } else {
@@ -128,16 +125,30 @@ const filterArticles = async () => {
     } else {
         url.searchParams.delete('price_max');
     }
+    if (selectedShippingOptions.value?.length > 0) {
+        url.searchParams.set('shipping', selectedShippingOptions.value.join('-'));
+    } else {
+        url.searchParams.delete('shipping');
+    }
+    if (selectedCountries.value?.length > 0) {
+        url.searchParams.set('countries', selectedCountries.value.map(country => country.code).join('-'));
+    } else {
+        url.searchParams.delete('countries');
+    }
 
     // Update the history and request the new data
     window.history.pushState({}, '', url.pathname + url.search);
     emit('filterChips', {filters: buildFilterChips(), clearAll: handleReset});
-    await update("/api/articles/search" + url.search)
-    resetDisabled.value = selectedCategories.value.length || priceRange.value.min || !priceRange.value.max || selectedShippingOptions.value || selectedCountries.value;
+    try {
+        await update("/api/articles/search" + url.search, true)
+    } catch (error) {
+        error.value = error.response?.data.error ? Object.entries(error.response.data.error).map(([key, value]) => `${key}: ${value}`).join('\n') : error.message;
+    }
+    resetDisabled.value = !!(selectedCategories.value.length || priceRange.value.min || !priceRange.value.max || selectedShippingOptions.value || selectedCountries.value);
     loading.value = false;
 };
 
-const resetDisabled = ref(!selectedCategories.value.length && !priceRange.value.min && !priceRange.value.max && !selectedShippingOptions.value && !selectedCountries.value);
+const resetDisabled = ref<boolean>(!selectedCategories.value.length && !priceRange.value.min && !priceRange.value.max && !selectedShippingOptions.value && !selectedCountries.value);
 async function handleReset() {
     resetDisabled.value = true;
     selectedConditions.value = [];
@@ -213,6 +224,14 @@ function buildFilterChips(): Filter[] {
     }
     return chips;
 }
+
+function parseStringQueryArray(query: string | null): string[] {
+    return query ? query.split('-') : [];
+}
+
+function parseNumberQueryArray(query: string | null): number[] {
+    return parseStringQueryArray(query).map(value => +value);
+}
 </script>
 
 <template>
@@ -276,7 +295,7 @@ function buildFilterChips(): Filter[] {
                 <span> - </span>
                 <InputGroup>
                     <FloatLabel>
-                        <InputNumber id="price-max-input" placeholder="" v-model="priceRange.max" @update:model-value="handleFormFieldChange" :max-fraction-digits="2" :min-fraction-digits="2" :min="priceRange.min"/>
+                        <InputNumber input-class="!rounded-r-none !border-r-0" id="price-max-input" placeholder="" v-model="priceRange.max" @update:model-value="handleFormFieldChange" :max-fraction-digits="2" :min-fraction-digits="2" :min="priceRange.min"/>
                         <label for="price-max-input">Max</label>
                     </FloatLabel>
                     <InputGroupAddon>€</InputGroupAddon>
@@ -327,6 +346,13 @@ function buildFilterChips(): Filter[] {
         >
             Reset Filters
         </Button>
+
+        <Transition name="fade">
+            <div v-if="error" class="alert alert-error">
+                An error occurred while applying your filters. <br><br>
+                {{ error }}
+            </div>
+        </Transition>
 
         <!-- Desktop Loading Spinner -->
         <Transition name="fade" class="max-md:hidden">
