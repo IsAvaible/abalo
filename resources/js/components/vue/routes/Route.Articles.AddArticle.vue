@@ -1,16 +1,18 @@
-import {createApp} from 'vue'
-
-import PrimeVue from "primevue/config";
-
+<script lang="ts">
+import {defineComponent} from 'vue'
 import SearchBar from "@/components/vue/page/SearchBar.vue";
 import AddArticleForm from "@/components/vue/articles/AddArticleForm.vue";
 
-
-createApp({
+export default defineComponent({
+    name: "RouteArticlesAddArticle",
+    template: '#route-articles-add-article',
     components: {
         SearchBar,
         AddArticleForm
     },
 })
-    .use(PrimeVue)
-    .mount('#app');
+</script>
+
+<style scoped>
+
+</style>

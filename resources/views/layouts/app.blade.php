@@ -120,6 +120,7 @@
     @show
 </div>
 
+@yield('templates')
 @yield('scripts')
 
 </body>
