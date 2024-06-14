@@ -16,8 +16,8 @@ class ArticleController extends Controller
     public function index(Request $request): View
     {
         // Attempt to get the shopping cart
-        $request = Request::create('/api/shoppingcart', 'GET');
-        $response = app()->handle($request);
+        $apiRequest = Request::create('/api/shoppingcart', 'GET');
+        $response = app()->handle($apiRequest);
 
         $shoppingCartId = null;
         $initialArticles = [];
@@ -25,16 +25,16 @@ class ArticleController extends Controller
         if ($response->isOk()) {
             $shoppingCartId = json_decode($response->getContent())->shoppingCartId;
             // Get the shopping cart items
-            $request = Request::create('/api/shoppingcart/' . $shoppingCartId . '/articles', 'GET');
-            $response = app()->handle($request);
+            $apiRequest = Request::create('/api/shoppingcart/' . $shoppingCartId . '/articles', 'GET');
+            $response = app()->handle($apiRequest);
 
             if ($response->isOk()) {
                 $shoppingCartItems = json_decode($response->getContent())->shoppingCartItems;
                 $articleIds = array_map(function($item) { return $item->ab_article_id; }, $shoppingCartItems);
 
                 // Get the articles
-                $request = Request::create('/api/articles/search', 'POST', ['articleIDs' => $articleIds]);
-                $response = app()->handle($request);
+                $apiRequest = Request::create('/api/articles/search', 'POST', ['articleIDs' => $articleIds]);
+                $response = app()->handle($apiRequest);
 
                 if ($response->isOk()) {
                     $articles = json_decode($response->getContent())->articles;
@@ -45,8 +45,26 @@ class ArticleController extends Controller
             }
         }
 
+        // Get the categories
+        $apiRequest = Request::create('/api/articles/categories', 'GET');
+        $response = app()->handle($apiRequest);
+
+        $categories = null;
+        if ($response->isOk()) {
+            $categories = json_decode($response->getContent())->categories;
+        }
+
         // Return the view
-        return view('articles.overview', ['search' => $request->query('search'), 'shoppingCartId' => $shoppingCartId, 'shoppingCartArticles' => $initialArticles]);
+        return view('articles.overview', [
+            'search' => $request->query('search'),
+            'shoppingCartId' => $shoppingCartId,
+            'shoppingCartArticles' => $initialArticles,
+            'categories' => $categories,
+            'selectedCategories' => $request->query('categories'),
+            'priceMin' => $request->query('price_min'),
+            'priceMax' => $request->query('price_max'),
+            'sortBy' => $request->query('sort_by'),
+        ]);
     }
 
     /**

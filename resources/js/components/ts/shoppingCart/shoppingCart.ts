@@ -247,6 +247,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log('Shopping cart ID:', cartID);
 
+    const shoppingCartElement = document.getElementById('shopping-cart')!;
     if (cartID !== null && !isNaN(cartID)) {
         const articles = JSON.parse(document.querySelector('meta[name="initial-shopping-cart-articles"]')!.getAttribute('content')!) as Article[];
         console.log('Shopping cart articles:', articles);
@@ -257,11 +258,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             for (const article of articles) {
                 addToCart(article, true);
             }
-            document.getElementById('shopping-cart')!.replaceChild(dialog, loadingSpinner);
+            shoppingCartElement.replaceChild(dialog, shoppingCartElement.firstChild);
             document.body.appendChild(cartButton);
         }, {once: true});
     } else {
-        document.getElementById('shopping-cart')!.replaceChild(dialog, loadingSpinner);
+        shoppingCartElement.replaceChild(dialog, shoppingCartElement.firstChild);
         document.body.appendChild(cartButton);
     }
 

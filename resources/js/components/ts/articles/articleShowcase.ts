@@ -3,7 +3,6 @@ import ArticleCard from './ArticleCard'; // Assuming ArticleCard is exported as 
 export default class ArticleShowcase
 {
     htmlElementID: string;
-    htmlElement: HTMLElement;
     articleCards: ArticleCard[] = [];
 
     constructor(htmlElementID: string)
@@ -12,19 +11,19 @@ export default class ArticleShowcase
         if (!document.getElementById(htmlElementID)) {
             throw new Error(`Element with ID ${htmlElementID} not found`);
         }
-        this.htmlElement = document.getElementById(htmlElementID)!;
     }
 
     // (Re)renders the showcase
     render()
     {
+        const htmlElement = document.getElementById(this.htmlElementID)!;
         // Clear the showcase
-        this.htmlElement.innerHTML = '';
+        htmlElement.innerHTML = '';
 
         if (this.articleCards.length) {
             // Insert the article cards
             this.articleCards.forEach((article) => {
-                article.insertInto(this.htmlElement);
+                article.insertInto(htmlElement);
             });
         } else {
             // No articles found, display a warning and a button to clear the parameters
@@ -42,9 +41,9 @@ export default class ArticleShowcase
 
             div.appendChild(warning);
             div.appendChild(clearButton);
-            this.htmlElement.appendChild(div);
+            htmlElement.appendChild(div);
         }
         // Trigger load event
-        this.htmlElement.dispatchEvent(new Event('load'));
+        htmlElement.dispatchEvent(new Event('load'));
     }
 }

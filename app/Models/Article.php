@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 
 /**
  *
@@ -33,4 +33,9 @@ class Article extends Model
     protected $table = 'ab_article';
     protected $primaryKey = 'id';
     public $timestamps = false;
+
+    public function categories()
+    {
+        return $this->belongsToMany(ArticleCategory::class, 'ab_article_has_articlecategory', 'ab_article_id', 'ab_articlecategory_id');
+    }
 }

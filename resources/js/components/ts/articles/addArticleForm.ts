@@ -64,7 +64,7 @@ form.addEventListener('submit', async (event) => {
 
     // Get the form data
     const formData = new FormData(form);
-    formData.set('price', Math.round((parseFloat(formData.get('price') as string)) * 100) + ''); // Convert the price to cents
+    formData.set('price', Math.floor((parseFloat(formData.get('price') as string)) * 100) + ''); // Convert the price to cents
 
     // Prepare the xhr request
     const xhr = new XMLHttpRequest();
