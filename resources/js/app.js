@@ -1,37 +1,29 @@
 import './bootstrap';
-
-import {createApp} from 'vue';
-import PrimeVue from 'primevue/config';
 import 'primevue/resources/themes/aura-light-noir/theme.css';
 import '../css/flags.css';
 
-import Tooltip from 'primevue/tooltip';
-import Dialog from 'primevue/dialog';
+import {createApp} from 'vue'
+import PrimeVue from "primevue/config";
+import Tooltip from "primevue/tooltip";
+
+import RouteArticles from "@/components/vue/routes/Route.Articles.vue";
+import RouteArticlesAddArticle from "@/components/vue/routes/Route.Articles.AddArticle.vue";
 
 import SearchBar from "@/components/vue/page/SearchBar.vue";
-import ArticleFilterForm from "@/components/vue/articles/ArticleFilterForm.vue";
-import SortOptionDropdown from "@/components/vue/articles/SortOptionDropdown.vue";
-import FilterChips from "@/components/vue/articles/FilterChips.vue";
+import ShoppingCart from "@/components/ts/shoppingCart/ShoppingCart";
+import "@/components/ts/NavigationMenu";
+import "@/components/ts/CookieBanner";
 
 createApp({
-    data() {return {filterChips: {}, filterDialogVisible: false, isMobile: window.innerWidth <= 768}},
-    created() {
-        window.addEventListener("resize", this.handleScreenSizeChange);
+    components: {
+        RouteArticles,
+        RouteArticlesAddArticle,
+
+        SearchBar,
     },
-    methods: {
-        handleScreenSizeChange() {
-            this.isMobile = window.innerWidth <= 768;
-            if (!this.isMobile) {
-                this.filterDialogVisible = false;
-            }
-        }
-    }
 })
-    .component('SearchBar', SearchBar)
-    .component('ArticleFilterForm', ArticleFilterForm)
-    .component('SortOptionDropdown', SortOptionDropdown)
-    .component('FilterChips', FilterChips)
-    .component('Dialog', Dialog)
     .use(PrimeVue)
     .directive('tooltip', Tooltip)
     .mount('#app');
+
+ShoppingCart.getInstance();

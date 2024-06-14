@@ -37,9 +37,14 @@ const doSearch = async (autoSearch: boolean) => {
         url.searchParams.delete('search');
     }
 
-    // Update the history and request the new data
-    window.history.pushState({}, '', url.pathname + url.search);
-    await update("/api/articles/search" + url.search);
+    if (url.pathname !== '/articles') {
+        url.pathname = '/articles';
+        window.location.href = url.href;
+    } else {
+        // Update the history and request the new data
+        window.history.pushState({}, '', url.pathname + url.search);
+        await update("/api/articles/search" + url.search);
+    }
     searching.value = false;
 };
 

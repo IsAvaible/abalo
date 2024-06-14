@@ -19,7 +19,7 @@
     @apply font-semibold;
 }
 
-.alert-danger {
+.alert-error {
     color: #a94442;
     background-color: #f1cfcf;
     border: 1px solid #ebccd1;
