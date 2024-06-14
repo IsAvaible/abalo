@@ -1,6 +1,6 @@
-import {addToCart} from "../shoppingCart/shoppingCart";
+import ShoppingCart from "../shoppingCart/ShoppingCart";
 import Article from "./Article";
-import {formatNumberToEuro} from "../../util/formatNumberToEuro";
+import {formatNumberToEuro} from "../../../util/formatNumberToEuro";
 
 const PLACEHOLDER_IMAGE_PATH = "https://via.placeholder.com/300x300";
 
@@ -46,7 +46,7 @@ export default class ArticleCard implements Article
         button.title = "Add to Cart";
         button.dataset.articleId = this.id.toString();
         button.onclick = () => {
-            addToCart(this as Article);
+            ShoppingCart.getInstance().addToCart(this as Article);
         }
 
         // Create the SVG element for the button

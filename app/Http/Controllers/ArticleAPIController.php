@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\ArticleCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -20,21 +21,49 @@ class ArticleAPIController extends Controller
         // Validate the request
         $validator = Validator::make($request->all(), [
             'search' => ['string'],
+            'categories' => ['string'],
+            'price_min' => ['numeric', 'min:0'],
+            'price_max' => ['numeric', 'min:0'],
             'limit' => ['numeric', 'min:0'],
+            'sort_by' => ['string', 'in:price_asc,price_desc,name_asc,name_desc'],
             'articleIDs' => ['array'],
             'articleIDs.*' => ['numeric', 'exists:ab_article,id'],
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors(), 'request' => $request->all()], 400);
+            return response()->json(['error' => $validator->errors()], 400);
         }
 
         // Get the query parameters
         $search = $request->input('search'); // Search query
+        $categories = $request->input('categories') ? json_decode('['.str_replace('-', ',',$request->input('categories')).']') : null; // Categories filter
         $limit = $request->input('limit'); // Limit of articles
+        $sortBy = $request->input('sort_by'); // Sorting option
         $articleIDs = $request->input('articleIDs'); // Array of article IDs
+        $priceMin = $request->input('price_min'); // Minimum price
+        $priceMax = $request->input('price_max'); // Maximum price
 
         // Get the matching articles
-        $articles = Article::where('ab_name', 'ilike', '%'.$search.'%')->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL)->limit($limit)->get();
+        $query = Article::
+            where('ab_name', 'ilike', '%'.$search.'%')
+            ->whereHas('categories', function ($query) use ($categories) {
+                $query->whereIn('ab_articlecategory.id', $categories ?? [], 'and', $categories === NULL);
+            });
+            if ($request->input('price_min')) {
+                $query->where('ab_price', '>=', (int) ($priceMin * 100));
+            }
+            if (is_numeric($request->input('price_max'))) {
+                $query->where('ab_price', '<=', (int) ($priceMax * 100));
+            }
+            $query->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL)
+            ->limit($limit);
+            if ($sortBy) {
+                if ($sortBy == 'price_asc' || $sortBy == 'price_desc') {
+                    $query->orderBy('ab_price', $sortBy == 'price_asc' ? 'asc' : 'desc');
+                } else {
+                    $query->orderBy('ab_name', $sortBy == 'name_asc' ? 'asc' : 'desc');
+                }
+            }
+        $articles = $query->get();
 
         // Add the image path to each article
         foreach ($articles as $article) {
@@ -42,7 +71,7 @@ class ArticleAPIController extends Controller
         }
 
         // Respond with the articles
-        return response()->json(['request' => $request->all(), 'articles' => $articles]);
+        return response()->json(['articles' => $articles]);
     }
 
     /**
@@ -81,6 +110,7 @@ class ArticleAPIController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'description' => 'required',
+            'category' => ['required', 'numeric', 'exists:ab_articlecategory,id'],
             'price' => ['required', 'numeric', 'min:0'],
             'image' => ['required', 'image', 'max:2048'],
         ]);
@@ -96,6 +126,10 @@ class ArticleAPIController extends Controller
         $article->ab_creator_id = 1; // $request->session()->get('abalo_user');
         $article->save();
 
+        // Get the corresponding category and attach it
+        $category = ArticleCategory::find($request->input('category'));
+        $article->categories()->attach($category);
+
         // Store the image
         $image = $request->file('image');
         $imageName = $article->id . '.' . $image->extension();
@@ -103,6 +137,18 @@ class ArticleAPIController extends Controller
 
         // Respond with success message
         return response()->json(['message' => 'Article created successfully', 'id' => $article->id], 201);
+    }
+
+    /**
+     * Get all categories
+     */
+    public function getArticleCategories(Request $request): JsonResponse
+    {
+        // Get all categories
+        $categories = ArticleCategory::all();
+
+        // Respond with the categories
+        return response()->json(['categories' => $categories]);
     }
 
     /**

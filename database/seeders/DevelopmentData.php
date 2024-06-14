@@ -35,6 +35,8 @@ class DevelopmentData extends Seeder
                 if ($name == 'ab_price') {
                     // Remove all dots from the price (they are used as thousand separators)
                     $row[$attribute] = str_replace('.', '', $row[$attribute]);
+                    // Convert the price to euros
+                    $row[$attribute] = intval($row[$attribute] * 100);
                 }
                 if ($row[$attribute] == 'NULL' || $row[$attribute] == 'null') {
                     // Convert 'NULL' or 'null' to NULL

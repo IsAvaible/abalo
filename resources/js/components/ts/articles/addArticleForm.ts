@@ -64,7 +64,7 @@ form.addEventListener('submit', async (event) => {
 
     // Get the form data
     const formData = new FormData(form);
-    formData.set('price', Math.round((parseFloat(formData.get('price') as string)) * 100) + ''); // Convert the price to cents
+    formData.set('price', Math.floor((parseFloat(formData.get('price') as string)) * 100) + ''); // Convert the price to cents
 
     // Prepare the xhr request
     const xhr = new XMLHttpRequest();
@@ -78,7 +78,7 @@ form.addEventListener('submit', async (event) => {
             submitButton.disabled = false; // Re-enable the submit button
             if (xhr.status === 201) {
                 // Display the success message
-                messageContainer.classList.replace('alert-danger', 'alert-info');
+                messageContainer.classList.replace('alert-error', 'alert-info');
                 messageContainer.textContent = response.message;
                 messageContainer.title = "";
                 form.append(messageContainer);
@@ -102,7 +102,7 @@ form.addEventListener('submit', async (event) => {
                 // Report the validity of the form
                 form.reportValidity();
                 // Display the error message in the message container
-                messageContainer.classList.replace('alert-info', 'alert-danger');
+                messageContainer.classList.replace('alert-info', 'alert-error');
                 messageContainer.textContent = response.message;
                 messageContainer.title = Object.keys(response.errors).map((key: string) => `• ${response.errors[key]}`).join('\n');
                 form.append(messageContainer);

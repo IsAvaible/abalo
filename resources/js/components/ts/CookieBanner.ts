@@ -1,4 +1,4 @@
-import CookieStore from '../stores/CookieStore';
+import CookieStore from '../../stores/CookieStore';
 
 // DOM manipulation and event handling
 const dialog = document.createElement('dialog');
