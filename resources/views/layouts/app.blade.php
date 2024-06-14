@@ -21,13 +21,13 @@
     <header class="w-full p-6">
         <nav class="mx-auto grid grid-cols-3 max-w-5xl">
             <div>
-                <a href="/" class="flex flex-row gap-x-2 items-center text-2xl font-bold text-slate-800">
+                <a href="/articles" class="flex flex-row gap-x-2 items-center text-2xl font-bold text-slate-800">
                     <img src="https://tailwindui.com/img/logos/mark.svg?color=black" alt="Logo" class="h-8">
                     <span class="max-sm:hidden">Abalo</span>
                 </a>
             </div>
             <div class="flex flex-row justify-center items-center gap-x-6 max-sm:[&>*:not(:nth-child(2))]:hidden">
-                <a href="/" class="flex flex-row gap-x-1 bg-slate-900 text-white rounded-full px-4 py-1">
+                <a href="/articles" class="flex flex-row gap-x-1 bg-slate-900 text-white rounded-full px-4 py-1">
                     <!-- Home Icon -->
                     <svg width="24px" height="24px" viewBox="0 0 24 24" stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor"><path d="M2 8L11.7317 3.13416C11.9006 3.04971 12.0994 3.0497 12.2683 3.13416L22 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20 11V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     Home
@@ -67,13 +67,8 @@
             </div>
         </nav>
     </header>
-    @show
 
-    @verbatim
-    <div id="hello-vue"></div>
-    @endverbatim
-
-    <div class="[&>*]:mx-auto [&>*]:w-fit min-h-screen py-3">
+    <div class="[&>*]:mx-auto [&>*]:w-fit min-h-[calc(100svh_-_4rem)] py-3" @hasSection('content-style') style="@yield('content-style')" @endif>
         @yield('content')
     </div>
 
@@ -126,8 +121,6 @@
 </div>
 
 @yield('scripts')
-@vite('resources/js/components/ts/NavigationMenu.ts')
-@vite('resources/js//components/ts/cookieBanner.ts')
 
 </body>
 </html>

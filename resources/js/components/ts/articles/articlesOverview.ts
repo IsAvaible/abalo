@@ -8,7 +8,7 @@ const articleShowcase = new ArticleShowcase('articles');
 /**
  * Initialize the showcase and add an event listener to the search form
  */
-const init = () => {
+export const init = () => {
     // Initialize the showcase
     update("/api/articles/search" + window.location.search);
 }
@@ -35,6 +35,4 @@ export const update = async (url: string | URL, forwardError: boolean = false) =
         document.getElementById(articleShowcase.htmlElementID)!.innerHTML = '<div class="alert alert-error">An error occurred while loading the articles</div>';
     }
 };
-
-init();
 

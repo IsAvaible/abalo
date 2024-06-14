@@ -8,9 +8,6 @@ export default class ArticleShowcase
     constructor(htmlElementID: string)
     {
         this.htmlElementID = htmlElementID;
-        if (!document.getElementById(htmlElementID)) {
-            throw new Error(`Element with ID ${htmlElementID} not found`);
-        }
     }
 
     // (Re)renders the showcase

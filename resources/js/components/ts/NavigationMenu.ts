@@ -167,12 +167,14 @@ document.addEventListener('DOMContentLoaded', function() {
     hamburgerButton.addEventListener('click', () => {
         toggleDialog()
 
-        document.addEventListener('click', (event) => {
+        const eventListener: EventListener = (event) => {
             if (isOpen && !navMenuDialog.contains(event.target as Node) && !hamburgerButton.contains(event.target as Node)) {
                 toggleDialog();
                 // Remove the event listener
-                document.removeEventListener('click', arguments.callee as EventListener);
+                document.removeEventListener('click', eventListener);
             }
-        });
+        }
+
+        document.addEventListener('click', eventListener);
     });
 });

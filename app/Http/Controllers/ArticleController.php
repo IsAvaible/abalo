@@ -69,6 +69,17 @@ class ArticleController extends Controller
      */
     public function add(): View
     {
-        return view('articles.add');
+        // Get the categories
+        $apiRequest = Request::create('/api/articles/categories', 'GET');
+        $response = app()->handle($apiRequest);
+
+        $categories = null;
+        if ($response->isOk()) {
+            $categories = json_decode($response->getContent())->categories;
+        }
+
+        return view('articles.add', [
+            'categories' => $categories,
+        ]);
     }
 }

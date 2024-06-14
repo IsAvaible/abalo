@@ -30,7 +30,7 @@ class ArticleAPIController extends Controller
             'articleIDs.*' => ['numeric', 'exists:ab_article,id'],
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors(), 'request' => $request->all()], 400);
+            return response()->json(['error' => $validator->errors()], 400);
         }
 
         // Get the query parameters
@@ -51,7 +51,7 @@ class ArticleAPIController extends Controller
             if ($request->input('price_min')) {
                 $query->where('ab_price', '>=', (int) ($priceMin * 100));
             }
-            if ($request->input('price_max')) {
+            if ($request->input('price_max') || $request->input('price_max') === 0) {
                 $query->where('ab_price', '<=', (int) ($priceMax * 100));
             }
             $query->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL)
@@ -71,7 +71,7 @@ class ArticleAPIController extends Controller
         }
 
         // Respond with the articles
-        return response()->json(['request' => $query->toSql(), 'articles' => $articles]);
+        return response()->json(['articles' => $articles]);
     }
 
     /**
@@ -110,6 +110,7 @@ class ArticleAPIController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'description' => 'required',
+            'category' => ['required', 'numeric', 'exists:ab_articlecategory,id'],
             'price' => ['required', 'numeric', 'min:0'],
             'image' => ['required', 'image', 'max:2048'],
         ]);
@@ -124,6 +125,10 @@ class ArticleAPIController extends Controller
         $article->ab_price = $request->input('price');
         $article->ab_creator_id = 1; // $request->session()->get('abalo_user');
         $article->save();
+
+        // Get the corresponding category and attach it
+        $category = ArticleCategory::find($request->input('category'));
+        $article->categories()->attach($category);
 
         // Store the image
         $image = $request->file('image');

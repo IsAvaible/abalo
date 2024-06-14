@@ -73,7 +73,7 @@ const categorySelect = ref();
 
 const priceRange = ref({
     min: +urlParams.get('price_min') || null,
-    max: +urlParams.get('price_max') || null,
+    max: urlParams.has('price_max') ? +urlParams.get('price_max') : null
 });
 
 const shippingOptions = {free: 'Free', express: 'Express', standard: 'Standard'};
@@ -120,7 +120,7 @@ const filterArticles = async () => {
     } else {
         url.searchParams.delete('price_min');
     }
-    if (priceRange.value.max) {
+    if (priceRange.value.max != null) {
         url.searchParams.set('price_max', priceRange.value.max.toString());
     } else {
         url.searchParams.delete('price_max');
@@ -144,11 +144,11 @@ const filterArticles = async () => {
     } catch (error) {
         error.value = error.response?.data.error ? Object.entries(error.response.data.error).map(([key, value]) => `${key}: ${value}`).join('\n') : error.message;
     }
-    resetDisabled.value = !!(selectedCategories.value.length || priceRange.value.min || !priceRange.value.max || selectedShippingOptions.value || selectedCountries.value);
+    resetDisabled.value = !selectedConditions.value.length && !selectedCategories.value.length && !priceRange.value.min && priceRange.value.max == null && !selectedShippingOptions.value.length && !selectedCountries.value.length;
     loading.value = false;
 };
 
-const resetDisabled = ref<boolean>(!selectedCategories.value.length && !priceRange.value.min && !priceRange.value.max && !selectedShippingOptions.value && !selectedCountries.value);
+const resetDisabled = ref<boolean>(!selectedConditions.value.length && !selectedCategories.value.length && !priceRange.value.min && priceRange.value.max == null && !selectedShippingOptions.value.length && !selectedCountries.value.length);
 async function handleReset() {
     resetDisabled.value = true;
     selectedConditions.value = [];
@@ -202,14 +202,14 @@ function buildFilterChips(): Filter[] {
         const value = selectedCategories.value.length <= 2 ? selectedCategories.value.map(category => category.ab_name).join(' & ') : `${selectedCategories.value.length} Categories`;
         chips.push({name: 'Categories', value: value, clear: () => {selectedCategoryNodes.value = []; filterArticles()}});
     }
-    if (priceRange.value.min || priceRange.value.max) {
+    if (priceRange.value.min || priceRange.value.max != null) {
         let value;
         if (priceRange.value.min && priceRange.value.max) {
             value = `${priceRange.value.min} - ${priceRange.value.max} €`;
         } else if (priceRange.value.min) {
             value = `Min ${priceRange.value.min} €`;
         } else {
-            value = `Max ${priceRange.value.max} €`;
+            value = `Max ${priceRange.value.max } €`;
         }
 
         chips.push({name: 'Price Range', value: value, clear: () => {priceRange.value = {min: null, max: null}; filterArticles()}});

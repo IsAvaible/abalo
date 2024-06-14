@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-    <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-slate-100 sm:text-5xl md:text-6xl">Articles Overview</h1>
+    <h1 class="tracking-tight font-extrabold text-gray-900 dark:text-slate-100 text-5xl md:text-6xl">Articles Overview</h1>
     <p class="mt-3 max-w-md mx-auto text-base text-gray-500 dark:text-slate-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">Discover our articles below.</p>
     <br>
     @if (session('success'))
@@ -22,7 +22,7 @@
         <div class="grid gap-8 2xl:gap-12 px-8 relative w-full" style="grid-template-columns: 1fr auto minmax(0,1fr)">
             <div class="col-span-full md:col-span-1">
                 <component :is="isMobile ? 'Dialog' : 'AppLayout'" v-model:visible="filterDialogVisible" modal header="Configure Filters">
-Ar                    <article-filter-form
+                    <article-filter-form
                         @verbatim v-on:filter-chips="chips => filterChips = chips" @endverbatim
                         categories='@json($categories)'
                     ></article-filter-form>
@@ -59,5 +59,5 @@ Ar                    <article-filter-form
 @endsection
 
 @section('scripts')
-    @vite('resources/js/components/ts/articles/articlesOverview.ts')
+    @vite('resources/js/components/vue/routes/Route.Articles.ts')
 @endsection
