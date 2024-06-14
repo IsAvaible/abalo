@@ -21,6 +21,7 @@ The branching model consists of the following branches:
 - `group`: The group branches are used to solve multiple dependent tasks. They are branched off from the `dev` branch and merged back into the `dev` branch.
 - `task`: The task branches are used to solve a single task. They are branched off from the `dev` or `group` branch and merged back into the originating branch. Developers may branch off from a `task` branch to simplify parallel development.
 - `hotfix`: The hotfix branches are used to fix critical bugs in the production code. They are branched off from the `main` branch and merged back into the `main` and `dev` branch.
+- `documentation`: The documentation branches are used to write any form of documentation. They are branched off from the `dev` or `group` branch and merged back into the originating branch.<br>&nbsp;&nbsp;<small>If the documentation is done in parallel with the development, the documentation should instead be done in the respective `task` or `group` branch.</small>
 
 ### Branching Workflow
 The branching workflow consists of the following steps:
