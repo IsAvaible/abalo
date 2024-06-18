@@ -1,6 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@layer tailwind-base, primevue, tailwind-utilities;
+
+@layer tailwind-base {
+    @tailwind base;
+}
+
+@layer tailwind-utilities {
+    @tailwind components;
+    @tailwind utilities;
+}
 
 .alert {
     display: flex;
@@ -12,7 +19,7 @@
     @apply font-semibold;
 }
 
-.alert-danger {
+.alert-error {
     color: #a94442;
     background-color: #f1cfcf;
     border: 1px solid #ebccd1;
