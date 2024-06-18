@@ -10,9 +10,15 @@ const props = defineProps({
         required: false,
         default: null,
     },
+    variant: {
+        type: String,
+        required: true,
+    }
 });
 
 const search = ref<string>(props.search ?? '');
+
+const articlesUrl = props.variant === 'oldsite' ? '/articles' : '/newsite';
 
 // Refs
 const input = ref<HTMLInputElement | null>(null);
@@ -37,8 +43,8 @@ const doSearch = async (autoSearch: boolean) => {
         url.searchParams.delete('search');
     }
 
-    if (url.pathname !== '/articles') {
-        url.pathname = '/articles';
+    if (url.pathname !== articlesUrl) {
+        url.pathname = articlesUrl;
         window.location.href = url.href;
     } else {
         // Update the history and request the new data
@@ -78,7 +84,7 @@ const handleFormFocusOut = (event: FocusEvent) => {
     <form
         id="search-form"
         ref="form"
-        action="/articles"
+        :action="articlesUrl"
         novalidate
         class="group relative flex flex-row max-w-full -mr-4 gap-x-2 items-center rounded-full py-1 max-sm:ring-opacity-100 hover:ring-opacity-100 focus-within:ring-opacity-100 has-[input:not(:placeholder-shown)]:ring-opacity-100 max-sm:px-4 hover:px-4 focus-within:px-4 has-[input:not(:placeholder-shown)]:px-4 max-sm:mr-0 hover:mr-0 focus-within:mr-0 has-[input:not(:placeholder-shown)]:mr-0 ring-1 ring-slate-800 ring-opacity-0 duration-500"
         @focusin="handleFormFocusIn"

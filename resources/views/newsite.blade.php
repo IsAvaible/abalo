@@ -6,8 +6,15 @@
     <meta name="csrf-token" id="csrf-token" content="{{ csrf_token() }}">
 
     <title>Abalo Vue</title>
+
+    @vite(['resources/css/app.css'])
+    @vite(['resources/js/app.js'])
 </head>
 
-<body id="spa-app">
-    Hello, World!
+<body>
+    <div id="spa-app">
+        <abalo-header></abalo-header>
+        <abalo-content></abalo-content>
+        <abalo-footer></abalo-footer>
+    </div>
 </body>

@@ -33,7 +33,7 @@
                     Home
                 </a>
 
-                <search-bar @isset($search) search="{{$search}}" @endisset></search-bar>
+                <search-bar variant="oldsite" @isset($search) search="{{$search}}" @endisset></search-bar>
 
                 <a href="#" class="hover:scale-110 transition-transform">
                     <!-- Heart Icon -->
