@@ -14,16 +14,31 @@ import ShoppingCart from "@/components/ts/shoppingCart/ShoppingCart";
 import "@/components/ts/NavigationMenu";
 import "@/components/ts/CookieBanner";
 
-createApp({
-    components: {
-        RouteArticles,
-        RouteArticlesAddArticle,
+// SSR
+if (document.getElementById('hyd-ssr-app')) {
+    createApp({
+        components: {
+            RouteArticles,
+            RouteArticlesAddArticle,
 
-        SearchBar,
-    },
-})
-    .use(PrimeVue)
-    .directive('tooltip', Tooltip)
-    .mount('#app');
+            SearchBar,
+        },
+    })
+        .use(PrimeVue)
+        .directive('tooltip', Tooltip)
+        .mount('#hyd-ssr-app');
 
-ShoppingCart.getInstance();
+    ShoppingCart.getInstance();
+}
+
+if (document.getElementById('spa-app')) {
+    createApp({
+        components: {
+            SearchBar,
+        },
+    })
+        .use(PrimeVue)
+        .directive('tooltip', Tooltip)
+        .mount('#spa-app');
+}
+

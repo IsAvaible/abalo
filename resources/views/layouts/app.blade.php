@@ -16,7 +16,7 @@
 </head>
 
 <body>
-<div id="app">
+<div id="hyd-ssr-app">
     @section('page')
     <header class="w-full p-6">
         <nav class="mx-auto grid grid-cols-3 max-w-5xl">
