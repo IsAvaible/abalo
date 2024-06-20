@@ -39,7 +39,6 @@ if (document.getElementById('hyd-ssr-app')) {
 
 // SPA
 if (document.getElementById('spa-app')) {
-    console.log('SPA App');
     createApp({
         components: {
             AbaloHeader,

@@ -7,7 +7,7 @@
 
     <title>Abalo Vue</title>
 
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.scss'])
     @vite(['resources/js/app.js'])
 </head>
 

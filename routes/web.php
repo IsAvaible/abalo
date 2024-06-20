@@ -20,4 +20,4 @@ Route::get('/articles/add', [App\Http\Controllers\ArticleController::class, 'add
 Route::post('/articles', [App\Http\Controllers\ArticleController::class, 'store'])->name('storearticle');
 
 // VueController
-Route::get('/newsite', [App\Http\Controllers\NewSiteController::class, 'index'])->name('vue');
+Route::get('/newsite/{any?}/{anysub?}', [App\Http\Controllers\NewSiteController::class, 'index'])->name('vue');

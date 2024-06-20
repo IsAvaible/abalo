@@ -49,3 +49,7 @@
     border: 1px solid #bce8f1;
     @apply font-semibold;
 }
+
+.full-body-route {
+    @apply bg-slate-100 grow self-stretch flex flex-col justify-center items-center
+}

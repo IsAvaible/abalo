@@ -1,0 +1,17 @@
+/**
+ * Navigate to a new URL without reloading the page.
+ * @param url The URL to navigate to.
+ * @param replace If true, the current URL will be replaced in the history.
+ */
+export default function navigate(url: string | HTMLAnchorElement, replace: boolean = false) {
+    if (url instanceof HTMLAnchorElement) {
+        url = url.href;
+    }
+
+    if (replace) {
+        window.history.replaceState({}, '', url);
+        return;
+    } else {
+        window.history.pushState({}, '', url);
+    }
+}

@@ -1,5 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
+import navigate from "@/util/navigate";
 
 export default defineComponent({
     name: "AbaloFooter",
@@ -11,6 +12,9 @@ export default defineComponent({
         }
     },
     methods: {
+        navigate(target: EventTarget) {
+            navigate(target as HTMLAnchorElement);
+        },
         scrollToTop() {
             window.scrollTo({
                 top: 0,
@@ -33,13 +37,13 @@ export default defineComponent({
         </div>
         <ul class="flex flex-wrap justify-center lg:justify-end text-sm text-gray-500 dark:text-gray-400 lg:flex-1 gap-x-4 md:gap-x-6">
             <li>
-                <a href="/privacy" class="hover:underline cursor-pointer">Privacy Policy</a>
+                <a href="/newsite/privacy" @click.prevent="this.navigate($event.target)" class="hover:underline cursor-pointer">Privacy Policy</a>
             </li>
             <li>
-                <a href="/licensing"  class="hover:underline cursor-pointer">Licensing</a>
+                <a href="/newsite/licensing" @click.prevent="this.navigate($event.target)" class="hover:underline cursor-pointer">Licensing</a>
             </li>
             <li>
-                <a href="/impressum" class="hover:underline cursor-pointer">Imprint</a>
+                <a href="/newsite/imprint" @click.prevent="this.navigate($event.target)" class="hover:underline cursor-pointer">Imprint</a>
             </li>
         </ul>
     </footer>
