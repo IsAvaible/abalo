@@ -49,5 +49,7 @@ if (document.getElementById('spa-app')) {
         .use(PrimeVue)
         .directive('tooltip', Tooltip)
         .mount('#spa-app');
+
+    import('@/components/ts/NavigationMenu');
 }
 
