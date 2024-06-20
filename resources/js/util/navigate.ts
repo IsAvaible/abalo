@@ -10,8 +10,10 @@ export default function navigate(url: string | HTMLAnchorElement, replace: boole
 
     if (replace) {
         window.history.replaceState({}, '', url);
-        return;
     } else {
         window.history.pushState({}, '', url);
     }
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    scroll({ top: 0, behavior: 'smooth' });
 }

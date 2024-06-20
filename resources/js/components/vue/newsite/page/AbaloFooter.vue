@@ -12,9 +12,7 @@ export default defineComponent({
         }
     },
     methods: {
-        navigate(target: EventTarget) {
-            navigate(target as HTMLAnchorElement);
-        },
+        navigate,
         scrollToTop() {
             window.scrollTo({
                 top: 0,
