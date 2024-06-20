@@ -1,9 +1,13 @@
-import {formatNumberToEuro} from "../../../util/formatNumberToEuro";
+import formatNumberToEuro from "../../../util/formatNumberToEuro";
 import Article from "../articles/Article";
+import axios from "axios";
+import waitForElement from "../../../util/waitForElement";
 
 export default class ShoppingCart {
     private static instance: ShoppingCart;
     private cart: Article[] = [];
+    private cartId: number | null = null;
+    private reloadListeners: Array<() => void> = [];
     private cartButton: HTMLButtonElement;
     private dialog: HTMLDivElement;
     private table: HTMLDivElement;
@@ -41,7 +45,7 @@ export default class ShoppingCart {
 
     private createDialog(): void {
         this.dialog = document.createElement('div');
-        this.dialog.className ='max-[1600px]:fixed bottom-20 right-4 bg-white rounded-lg max-[1600px]:shadow-lg p-4 max-[1600px]:pointer-events-none max-[1600px]:opacity-0 max-[1600px]:scale-0 origin-[calc(100%_-_2rem)_bottom] duration-300 min-w-68';
+        this.dialog.className ='max-[1600px]:fixed bottom-20 w-fit right-4 bg-white rounded-lg max-[1600px]:shadow-lg p-4 max-[1600px]:pointer-events-none max-[1600px]:opacity-0 max-[1600px]:scale-0 origin-[calc(100%_-_2rem)_bottom] duration-300 min-w-68';
         this.dialog.style.transitionProperty = 'opacity, transform';
 
         this.table = document.createElement('div');
@@ -81,13 +85,11 @@ export default class ShoppingCart {
     private attachEventListeners(): void {
         this.cartButton.addEventListener('click', () => this.toggleCartDialog());
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('Fetching shopping cart items...');
-            const cartID = JSON.parse(document.querySelector('meta[name="shopping-cart-id"]')!.getAttribute('content'));
-            console.log('Shopping cart ID:', cartID);
+            await this.loadShoppingCartId();
             const shoppingCartElement = document.getElementById('shopping-cart')!;
-            if (cartID!== null &&!isNaN(cartID)) {
-                const articles = JSON.parse(document.querySelector('meta[name="initial-shopping-cart-articles"]')!.getAttribute('content')!) as Article[];
-                console.log('Shopping cart articles:', articles);
+            if (this.cartId !== null && !isNaN(this.cartId)) {
+                // Load the articles from the server or the meta tag if available
+                const articles = await this.loadShoppingCartArticles();
                 document.getElementById('articles')!.addEventListener('load', () => {
                     for (const article of articles) {
                         this.addToCart(article, true);
@@ -96,6 +98,7 @@ export default class ShoppingCart {
                     document.body.appendChild(this.cartButton);
                 }, { once: true });
             } else {
+                // Start with an empty cart if the shopping cart ID is not available
                 shoppingCartElement.replaceChild(this.dialog, shoppingCartElement.firstChild);
                 document.body.appendChild(this.cartButton);
             }
@@ -113,17 +116,54 @@ export default class ShoppingCart {
         });
     }
 
+    private async loadShoppingCartId(): Promise<void> {
+        if (document.querySelector('meta[name="shopping-cart-id"]') !== null) {
+            // Get the shopping cart ID from the meta tag
+            this.cartId = JSON.parse(document.querySelector('meta[name="shopping-cart-id"]')!.getAttribute('content')!);
+        } else {
+            this.cartId = null;
+            return;
+            // Fetch the shopping cart ID from the server
+            const response = await axios.get('/api/shoppingcart');
+            this.cartId = response.data.shoppingCartId;
+        }
+    }
+
+    private async loadShoppingCartArticles(forceRemote: boolean = false): Promise<Article[]> {
+        if (this.cartId === null) {
+            console.error('Shopping cart ID is null.');
+            return;
+        }
+        if (!forceRemote && document.querySelector('meta[name="initial-shopping-cart-articles"]')) {
+            return JSON.parse(document.querySelector('meta[name="initial-shopping-cart-articles"]')!.getAttribute('content')!) as Article[];
+        } else {
+            const response = await axios.get(`/api/shoppingcart/${this.cartId}/articles`);
+            return response.data.articles as Article[];
+        }
+    }
+
     private toggleCartDialog(): void {
         this.dialog.classList.toggle('max-[1600px]:pointer-events-none');
         this.dialog.classList.toggle('max-[1600px]:scale-0');
         this.dialog.classList.toggle('max-[1600px]:opacity-0');
     }
 
+    public bind(): void {
+        document.getElementById('shopping-cart')!.appendChild(this.dialog);
+        waitForElement('#articles').then(element => {
+            element.addEventListener('load', () => {
+                for (const listener of this.reloadListeners) {
+                    listener();
+                    element.addEventListener('load', listener);
+                }
+            }, { once: true });
+        });
+    }
+
     public addToCart(article: Article, fromDB: boolean = false): void {
-        const shoppingCartId = JSON.parse(document.querySelector('meta[name="shopping-cart-id"]')!.getAttribute('content')!);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-        const syncWithRemote = !fromDB && shoppingCartId && csrfToken;
+        const syncWithRemote = !fromDB && this.cartId && csrfToken;
 
         if (!fromDB && !syncWithRemote) {
             console.log("Adding article with name", article.ab_name, "to the local cart.");
@@ -148,7 +188,7 @@ export default class ShoppingCart {
 
         if (syncWithRemote) {
             // Add the article to the remote shopping cart
-            fetch(`/api/shoppingcart/${shoppingCartId}/articles/${article.id}`, {
+            fetch(`/api/shoppingcart/${this.cartId}/articles/${article.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -200,6 +240,7 @@ export default class ShoppingCart {
             addToCartButton.disabled = true;
         }
         document.getElementById('articles')!.addEventListener('load', articlesReloadListener);
+        this.reloadListeners.push(articlesReloadListener);
 
         // Attach the click event listener to the remove button
         itemRemoveButton.addEventListener('click', () => {
@@ -210,11 +251,10 @@ export default class ShoppingCart {
                 itemRow.classList.add('opacity-0');
             });
 
-            const shoppingCartId = JSON.parse(document.querySelector('meta[name="shopping-cart-id"]')!.getAttribute('content')!);
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-            if (shoppingCartId && csrfToken) {
-                fetch(`/api/shoppingcart/${shoppingCartId}/articles/${article.id}`, {
+            if (this.cartId && csrfToken) {
+                fetch(`/api/shoppingcart/${this.cartId}/articles/${article.id}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -237,6 +277,7 @@ export default class ShoppingCart {
 
             // Remove the articles reload listener
             document.getElementById('articles')!.removeEventListener('load', articlesReloadListener);
+            this.reloadListeners.splice(this.reloadListeners.indexOf(articlesReloadListener), 1);
 
             // Reset the button in the overview table
             const addToCartButton = document.querySelector(`button[data-article-id="${article.id}"]`) as HTMLButtonElement;

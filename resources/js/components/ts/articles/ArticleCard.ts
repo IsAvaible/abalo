@@ -1,6 +1,6 @@
 import ShoppingCart from "../shoppingCart/ShoppingCart";
 import Article from "./Article";
-import {formatNumberToEuro} from "../../../util/formatNumberToEuro";
+import formatNumberToEuro from "../../../util/formatNumberToEuro";
 
 const PLACEHOLDER_IMAGE_PATH = "https://via.placeholder.com/300x300";
 

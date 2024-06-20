@@ -17,7 +17,6 @@ import {Filter} from "@/components/vue/articles/FilterChips";
 // Get props
 const props = defineProps({
     categories: {
-        type: String,
         required: true,
     }
 });
@@ -52,7 +51,7 @@ const conditions = {
 };
 const selectedConditions = ref(parseStringQueryArray(urlParams.get('conditions')));
 
-const categories = ref<ArticleCategory[]>(JSON.parse(props.categories))
+const categories = ref<ArticleCategory[]>(typeof props.categories === 'string' ? JSON.parse(props.categories) : props.categories);
 const selectedCategories = ref<ArticleCategory[]>(categories.value.filter(category => urlParams.get('categories') && parseNumberQueryArray(urlParams.get('categories')).includes(category.id)));
 const [nodes, map] = buildCategoryTree(categories.value);
 const categoryNodes = ref<TreeNode[]>(nodes);

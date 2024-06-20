@@ -1,5 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
+import navigate from "@/util/navigate";
 
 import SearchBar from "@/components/vue/page/SearchBar.vue";
 
@@ -22,6 +23,9 @@ export default defineComponent({
         IconBell,
         IconCart,
         IconUser,
+    },
+    methods: {
+        navigate
     }
 })
 </script>
@@ -30,13 +34,13 @@ export default defineComponent({
     <header class="w-full p-6">
         <nav class="mx-auto grid grid-cols-3 max-w-5xl">
             <div>
-                <a href="/newsite" class="flex flex-row gap-x-2 items-center text-2xl font-bold text-slate-800">
+                <a href="/newsite" @click.prevent="this.navigate($event.currentTarget)" class="flex flex-row gap-x-2 items-center text-2xl font-bold text-slate-800">
                     <img src="https://tailwindui.com/img/logos/mark.svg?color=black" alt="Logo" class="h-8">
                     <span class="max-sm:hidden">Abalo</span>
                 </a>
             </div>
             <div class="flex flex-row justify-center items-center gap-x-6 max-sm:[&>*:not(:nth-child(2))]:hidden">
-                <a href="/newsite" class="flex flex-row gap-x-1 bg-slate-900 text-white rounded-full px-4 py-1">
+                <a href="/newsite" @click.prevent="this.navigate($event.currentTarget)" class="flex flex-row gap-x-1 bg-slate-900 text-white rounded-full px-4 py-1">
                     <IconHome class="w-6 h-6" />
                     Home
                 </a>

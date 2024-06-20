@@ -25,7 +25,7 @@ export default defineComponent({
                     document.title = "Abalo - Home";
                     this.component = "Index";
                     break;
-                case "/privacy-policy":
+                case "/privacy":
                     document.title = "Abalo - Privacy Policy";
                     this.component = "PrivacyPolicy";
                     break;
@@ -63,7 +63,7 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="min-h-[calc(100svh_-_5rem)] bg-slate-100 flex flex-col">
+    <div class="min-h-[calc(100svh_-_5rem)] flex flex-col">
         <component :is="component" />
     </div>
 </template>

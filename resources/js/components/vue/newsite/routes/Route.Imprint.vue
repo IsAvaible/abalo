@@ -59,7 +59,7 @@ export default defineComponent({
             </p>
             <h3 class="text-lg font-semibold mb-2">Datenschutz</h3>
             <p class="mb-4">
-                Informationen zum Datenschutz finden Sie in unserer <a href="/newsite/privacy-policy" @click.prevent="this.navigate($event.target)" class="text-blue-500 hover:underline">Datenschutzerklärung</a>.
+                Informationen zum Datenschutz finden Sie in unserer <a href="/newsite/privacy" @click.prevent="this.navigate($event.currentTarget)" class="text-blue-500 hover:underline">Datenschutzerklärung</a>.
             </p>
             <p class="text-sm text-gray-600 mt-4">
                 Dieses Impressum wurde erstellt im Rahmen des Moduls "DBWT 2 (Datenbanken und Web-Technologien 2)" an der FH Aachen und ist Bestandteil des Projekts "Abalo", einem simplen C2C Webshop, entwickelt von Simon Felix Conrad und Dennis Costa Wolff.
