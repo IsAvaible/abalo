@@ -16,7 +16,8 @@ export default defineComponent({
             filterDialogVisible: false,
             isMobile: window.innerWidth <= 768,
             categories: [],
-            categoriesLoaded: false
+            categoriesLoaded: false,
+            sortBy: new URLSearchParams(window.location.search).get('sort_by')
         }
     },
     components: {
@@ -29,7 +30,9 @@ export default defineComponent({
     mounted() {
         window.addEventListener("resize", this.handleScreenSizeChange);
         this.loadCategories();
-        ShoppingCart.getInstance().bind();
+        const cart = ShoppingCart.getInstance();
+        cart.setVariant("newsite");
+        cart.bind();
     },
     methods: {
         loadCategories() {
@@ -63,6 +66,7 @@ export default defineComponent({
                         v-if="categoriesLoaded"
                         v-on:filter-chips="chips => filterChips = chips"
                         :categories="categories"
+                        variant="newsite"
                     ></article-filter-form>
                 </component>
             </div>
@@ -83,8 +87,7 @@ export default defineComponent({
                             </svg>
                         </button>
                         <!-- Sort -->
-                        <sort-option-dropdown class="md:ml-auto"
-                                              selected-sorting-option="{{$sortBy}}"></sort-option-dropdown>
+                        <sort-option-dropdown class="md:ml-auto" :selected-sorting-option="sortBy" variant="newsite"></sort-option-dropdown>
                     </div>
                     <!-- Articles -->
                     <ArticleShowcase/>

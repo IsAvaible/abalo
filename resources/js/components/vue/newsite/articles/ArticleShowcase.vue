@@ -1,51 +1,106 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
+import {defineComponent} from 'vue';
 import axios from "axios";
 import ArticleCard from "./ArticleCard.vue";
+import Paginator, {PageState} from 'primevue/paginator';
+import ShoppingCart from "@/components/ts/shoppingCart/ShoppingCart";
+import Article from "@/models/Article";
 
 export default defineComponent({
     name: "ArticleShowcase",
     components: {
-        ArticleCard
+        ArticleCard,
+        Paginator
     },
     data() {
+        const search = new URLSearchParams(window.location.search);
         return {
             loading: true,
             articles: [],
-            error: false
+            error: false,
+            totalRecords: 0,
+            limit: parseInt(search.get('limit') ?? '6'),
+            replacingUrl: false,
+            currentPage: parseInt(search.get('page') ?? '0'),
         };
     },
     async created() {
-        await this.updateArticles("/api/articles/search" + window.location.search);
+        await this.updateArticles();
+    },
+    async mounted() {
+        window.navigation.addEventListener("navigate", (event) => {
+            if (event.destination.url === window.location.href) return;
+            const destination = new URL(event.destination.url);
+            if (destination.pathname.startsWith('/newsite/articles')) return;
+            this.onNavigate(destination);
+        });
     },
     methods: {
-        async updateArticles(url, forwardError = false) {
+        async onNavigate(url: URL) {
+            if (this.replacingUrl) return;
+            this.currentPage = 0;
+            this.limit = parseInt(url.searchParams.get('limit') ?? '6');
+            this.updateURLParams(url);
+            await this.updateArticles();
+        },
+        async updateArticles() {
             this.loading = true;
+            this.scrollToTop();
             try {
-                const response = await axios.get(url, {
+                const params = {limit: this.limit, page: this.currentPage};
+                for(const [key, value] of new URLSearchParams(window.location.search)) {
+                    params[key] = value;
+                }
+                const response = await axios.get('/api/articles/search', {
+                    params: params,
                     headers: { "Content-Type": "application/json" }
                 });
                 this.articles = response.data.articles;
+                this.totalRecords = response.data.totalRecords;
                 this.error = false;
             } catch (error) {
                 this.error = true;
-                if (forwardError) {
-                    throw error;
-                }
             }
             this.loading = false;
+            this.currentPage = parseInt(new URLSearchParams(window.location.search).get('page') ?? '0');
             await new Promise(resolve => setTimeout(resolve, 0));
             this.$el.dispatchEvent(new Event('load'));
         },
-        isInCart(articleId) {
-            return false;
-        }
+        onPageChange(event: PageState) {
+            this.currentPage = event.page;
+            this.updateURLParams();
+            this.updateArticles();
+        },
+        onRowsUpdate(event: number) {
+            this.limit = event;
+        },
+        scrollToTop() {
+            window.scroll({top: 0, behavior: 'smooth'});
+        },
+        updateURLParams(url: URL = new URL(window.location.href)) {
+            if (this.limit === 6) {
+                url.searchParams.delete('limit');
+            } else {
+                url.searchParams.set('limit', this.limit.toString());
+            }
+            if (this.currentPage === 0) {
+                url.searchParams.delete('page');
+            } else {
+                url.searchParams.set('page', this.currentPage.toString());
+            }
+            this.replacingUrl = true;
+            window.history.replaceState({}, '', url.toString());
+            this.replacingUrl = false;
+        },
+        isInCart(article: Article) {
+            return ShoppingCart.getInstance().isInCart(article);
+        },
     }
-})
+});
 </script>
 
 <template>
-    <section id="articles" aria-description="List of articles" class="col-span-full grid grid-cols-[inherit] gap-[inherit]">
+    <section id="articles" aria-description="List of articles" class="col-span-full grid grid-cols-[inherit] gap-[inherit] 2xl:min-w-[1024px]">
         <div v-if="loading" role="status" class="col-span-full flex justify-center items-center aspect-square">
             <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-slate-800" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
@@ -58,11 +113,21 @@ export default defineComponent({
             v-for="article in articles"
             :key="article.id"
             :article="article"
-            :in-cart="isInCart(article.id)"
+            :in-cart="isInCart(article)"
         />
         <div v-if="error" class="alert alert-error">
             An error occurred while loading the articles
         </div>
+        <Paginator
+            :rows="limit"
+            :totalRecords="totalRecords"
+            :first="currentPage * limit + 1"
+            @page="onPageChange"
+            :alwaysShow="true"
+            @update:rows="onRowsUpdate"
+            :rowsPerPageOptions="[6, 12, 24, 48]"
+            class="col-span-full flex justify-center mt-4"
+        />
     </section>
 </template>
 

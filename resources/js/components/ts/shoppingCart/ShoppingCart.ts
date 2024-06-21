@@ -8,6 +8,7 @@ export default class ShoppingCart {
     private cart: Article[] = [];
     private cartId: number | null = null;
     private reloadListeners: Array<() => void> = [];
+    private variant: string = 'oldsite';
     private cartButton: HTMLButtonElement;
     private dialog: HTMLDivElement;
     private table: HTMLDivElement;
@@ -148,16 +149,30 @@ export default class ShoppingCart {
         this.dialog.classList.toggle('max-[1600px]:opacity-0');
     }
 
+    public setVariant(variant: string): void {
+        if (variant !== 'oldsite' && variant !== 'newsite') {
+            console.error('Invalid variant:', variant);
+            return;
+        }
+        this.variant = variant;
+    }
+
     public bind(): void {
         document.getElementById('shopping-cart')!.appendChild(this.dialog);
-        waitForElement('#articles').then(element => {
-            element.addEventListener('load', () => {
-                for (const listener of this.reloadListeners) {
-                    listener();
-                    element.addEventListener('load', listener);
-                }
-            }, { once: true });
-        });
+        if (this.variant === 'oldsite') {
+            waitForElement('#articles').then(element => {
+                element.addEventListener('load', () => {
+                    for (const listener of this.reloadListeners) {
+                        listener();
+                        element.addEventListener('load', listener);
+                    }
+                }, {once: true});
+            });
+        }
+    }
+
+    public isInCart(article: Article): boolean {
+        return this.cart.find((a) => a.id === article.id) !== undefined;
     }
 
     public addToCart(article: Article, fromDB: boolean = false): void {
@@ -219,7 +234,7 @@ export default class ShoppingCart {
         itemName.textContent = article.ab_name;
         const itemPrice = document.createElement('span');
         itemPrice.textContent = formatNumberToEuro(article.ab_price);
-        itemPrice.classList.add('text-nowrap');
+        itemPrice.classList.add('text-nowrap', 'text-right');
         const itemRemoveButton = document.createElement('button');
         itemRemoveButton.innerHTML = '<svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor"  stroke-width="1.5"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 1.25C6.06294 1.25 1.25 6.06294 1.25 12C1.25 17.9371 6.06294 22.75 12 22.75C17.9371 22.75 22.75 17.9371 22.75 12C22.75 6.06294 17.9371 1.25 12 1.25ZM9.70164 8.64124C9.40875 8.34835 8.93388 8.34835 8.64098 8.64124C8.34809 8.93414 8.34809 9.40901 8.64098 9.7019L10.9391 12L8.64098 14.2981C8.34809 14.591 8.34809 15.0659 8.64098 15.3588C8.93388 15.6517 9.40875 15.6517 9.70164 15.3588L11.9997 13.0607L14.2978 15.3588C14.5907 15.6517 15.0656 15.6517 15.3585 15.3588C15.6514 15.0659 15.6514 14.591 15.3585 14.2981L13.0604 12L15.3585 9.7019C15.6514 9.40901 15.6514 8.93414 15.3585 8.64124C15.0656 8.34835 14.5907 8.34835 14.2978 8.64124L11.9997 10.9393L9.70164 8.64124Z"></path></svg>';
         itemRemoveButton.classList.add('text-slate-800', 'hover:scale-105', 'hover:text-black');
@@ -238,9 +253,11 @@ export default class ShoppingCart {
             if (!addToCartButton) return
             addToCartButton.title = 'In Cart';
             addToCartButton.disabled = true;
+        };
+        if (this.variant === 'oldsite') {
+            document.getElementById('articles')!.addEventListener('load', articlesReloadListener);
+            this.reloadListeners.push(articlesReloadListener);
         }
-        document.getElementById('articles')!.addEventListener('load', articlesReloadListener);
-        this.reloadListeners.push(articlesReloadListener);
 
         // Attach the click event listener to the remove button
         itemRemoveButton.addEventListener('click', () => {
@@ -275,9 +292,11 @@ export default class ShoppingCart {
                 console.log('Removed article with name', article.ab_name, 'from the local cart.');
             }
 
-            // Remove the articles reload listener
-            document.getElementById('articles')!.removeEventListener('load', articlesReloadListener);
-            this.reloadListeners.splice(this.reloadListeners.indexOf(articlesReloadListener), 1);
+            if (this.variant === 'oldsite') {
+                // Remove the articles reload listener
+                document.getElementById('articles')!.removeEventListener('load', articlesReloadListener);
+                this.reloadListeners.splice(this.reloadListeners.indexOf(articlesReloadListener), 1);
+            }
 
             // Reset the button in the overview table
             const addToCartButton = document.querySelector(`button[data-article-id="${article.id}"]`) as HTMLButtonElement;

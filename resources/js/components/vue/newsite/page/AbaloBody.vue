@@ -48,8 +48,8 @@ export default defineComponent({
         // Load the proper content when the page loads
         this.onNavigate(new URL(window.location.href));
         // Update the content when the URL changes
-        window.navigation.addEventListener("navigate", (event) => {
-            this.onNavigate(new URL(event.destination.url));
+        window.addEventListener("popstate", () => {
+            this.onNavigate(new URL(window.location.href));
         })
     },
     components: {

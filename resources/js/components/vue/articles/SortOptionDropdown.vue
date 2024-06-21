@@ -10,6 +10,11 @@ const props = defineProps({
         required: false,
         default: null,
     },
+    variant: {
+        type: String,
+        required: false,
+        default: 'oldsite',
+    }
 });
 
 const sortingOptions = [
@@ -34,7 +39,17 @@ async function handleSelectionChange() {
     }
 
     window.history.pushState({}, '', url.pathname + url.search);
-    await update("/api/articles/search" + url.search);
+    if (props.variant === 'oldsite') {
+        await update("/api/articles/search" + url.search);
+    } else {
+        // Wait for the articles to reload
+        await new Promise<void>((resolve) => {
+            document.getElementById('articles').addEventListener('load', () => {
+                resolve();
+            }, {once: true});
+        });
+    }
+
     loading.value = false;
 }
 </script>

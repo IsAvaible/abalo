@@ -18,6 +18,11 @@ import {Filter} from "@/components/vue/articles/FilterChips";
 const props = defineProps({
     categories: {
         required: true,
+    },
+    variant: {
+        type: String,
+        required: false,
+        default: 'oldsite',
     }
 });
 
@@ -139,7 +144,16 @@ const filterArticles = async () => {
     window.history.pushState({}, '', url.pathname + url.search);
     emit('filterChips', {filters: buildFilterChips(), clearAll: handleReset});
     try {
-        await update("/api/articles/search" + url.search, true)
+        if (props.variant === 'oldsite') {
+            await update("/api/articles/search" + url.search, true)
+        } else {
+            // Wait for the articles to reload
+            await new Promise<void>((resolve) => {
+                document.getElementById('articles').addEventListener('load', () => {
+                    resolve();
+                }, {once: true});
+            });
+        }
     } catch (error) {
         error.value = error.response?.data.error ? Object.entries(error.response.data.error).map(([key, value]) => `${key}: ${value}`).join('\n') : error.message;
     }

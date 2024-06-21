@@ -14,6 +14,5 @@ export default function navigate(url: string | HTMLAnchorElement, replace: boole
         window.history.pushState({}, '', url);
     }
 
-    window.dispatchEvent(new PopStateEvent('popstate'));
     scroll({ top: 0, behavior: 'smooth' });
 }

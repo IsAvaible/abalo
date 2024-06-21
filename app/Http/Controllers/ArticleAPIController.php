@@ -25,6 +25,7 @@ class ArticleAPIController extends Controller
             'price_min' => ['numeric', 'min:0'],
             'price_max' => ['numeric', 'min:0'],
             'limit' => ['numeric', 'min:0'],
+            'page' => ['numeric', 'min:0'],
             'sort_by' => ['string', 'in:price_asc,price_desc,name_asc,name_desc'],
             'articleIDs' => ['array'],
             'articleIDs.*' => ['numeric', 'exists:ab_article,id'],
@@ -37,6 +38,7 @@ class ArticleAPIController extends Controller
         $search = $request->input('search'); // Search query
         $categories = $request->input('categories') ? json_decode('['.str_replace('-', ',',$request->input('categories')).']') : null; // Categories filter
         $limit = $request->input('limit'); // Limit of articles
+        $page = $request->input('page'); // Page number
         $sortBy = $request->input('sort_by'); // Sorting option
         $articleIDs = $request->input('articleIDs'); // Array of article IDs
         $priceMin = $request->input('price_min'); // Minimum price
@@ -54,8 +56,7 @@ class ArticleAPIController extends Controller
             if (is_numeric($request->input('price_max'))) {
                 $query->where('ab_price', '<=', (int) ($priceMax * 100));
             }
-            $query->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL)
-            ->limit($limit);
+            $query->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL);
             if ($sortBy) {
                 if ($sortBy == 'price_asc' || $sortBy == 'price_desc') {
                     $query->orderBy('ab_price', $sortBy == 'price_asc' ? 'asc' : 'desc');
@@ -63,7 +64,9 @@ class ArticleAPIController extends Controller
                     $query->orderBy('ab_name', $sortBy == 'name_asc' ? 'asc' : 'desc');
                 }
             }
-        $articles = $query->get();
+        // Apply limit and offset
+        $totalRecords = $query->count();
+        $articles = $query->limit($limit)->offset($page * $limit)->get();
 
         // Add the image path to each article
         foreach ($articles as $article) {
@@ -71,7 +74,7 @@ class ArticleAPIController extends Controller
         }
 
         // Respond with the articles
-        return response()->json(['articles' => $articles]);
+        return response()->json(['articles' => $articles, 'totalRecords' => $totalRecords]);
     }
 
     /**

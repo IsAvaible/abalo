@@ -16,7 +16,7 @@ const props = defineProps({
     }
 });
 
-const search = ref<string>(props.search ?? '');
+const search = ref<string>(props.search ?? new URLSearchParams(window.location.search).get('search') ?? '');
 
 const articlesUrl = props.variant === 'oldsite' ? '/articles' : '/newsite';
 
@@ -49,7 +49,17 @@ const doSearch = async (autoSearch: boolean) => {
     } else {
         // Update the history and request the new data
         window.history.pushState({}, '', url.pathname + url.search);
-        await update("/api/articles/search" + url.search);
+        if (props.variant === 'oldsite') {
+            await update("/api/articles/search" + url.search);
+        } else {
+            // Wait for the articles to reload
+            await new Promise<void>((resolve) => {
+                document.getElementById('articles').addEventListener('load', () => {
+                    resolve();
+                }, {once: true});
+            });
+        }
+
     }
     searching.value = false;
 };
