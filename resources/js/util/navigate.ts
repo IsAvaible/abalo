@@ -15,4 +15,6 @@ export default function navigate(url: string | HTMLAnchorElement, replace: boole
     }
 
     scroll({ top: 0, behavior: 'smooth' });
+
+    window.dispatchEvent(new CustomEvent('navigate', { detail: { url } }));
 }

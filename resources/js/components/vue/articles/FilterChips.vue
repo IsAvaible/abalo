@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import {defineProps} from 'vue';
-
 export interface Filter {
         name: string;
         value: string;

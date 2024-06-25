@@ -15,6 +15,7 @@ import ShoppingCart from "@/components/ts/shoppingCart/ShoppingCart";
 import AbaloHeader from "@/components/vue/newsite/page/AbaloHeader.vue";
 import AbaloContent from "@/components/vue/newsite/page/AbaloBody.vue";
 import AbaloFooter from "@/components/vue/newsite/page/AbaloFooter.vue";
+import {createPinia} from "pinia";
 
 
 // SSR
@@ -47,9 +48,8 @@ if (document.getElementById('spa-app')) {
         },
     })
         .use(PrimeVue)
+        .use(createPinia())
         .directive('tooltip', Tooltip)
         .mount('#spa-app');
-
-    import('@/components/ts/NavigationMenu');
 }
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import Index from "@/components/vue/newsite/routes/Route.Index.vue";
+import Sell from "@/components/vue/newsite/routes/Route.Sell.vue";
 import PrivacyPolicy from "@/components/vue/newsite/routes/Route.PrivacyPolicy.vue";
 import Imprint from "@/components/vue/newsite/routes/Route.Imprint.vue";
 import Licensing from "@/components/vue/newsite/routes/Route.Licensing.vue";
@@ -10,7 +11,8 @@ export default defineComponent({
     name: "AbaloBody",
     data() {
         return {
-            component: 'Index'
+            component: '',
+            currentPath: window.location.pathname
         }
     },
     methods: {
@@ -24,6 +26,10 @@ export default defineComponent({
                 case "/":
                     document.title = "Abalo - Home";
                     this.component = "Index";
+                    break;
+                case "/sell":
+                    document.title = "Abalo - Sell Article";
+                    this.component = "Sell";
                     break;
                 case "/privacy":
                     document.title = "Abalo - Privacy Policy";
@@ -50,10 +56,15 @@ export default defineComponent({
         // Update the content when the URL changes
         window.addEventListener("popstate", () => {
             this.onNavigate(new URL(window.location.href));
-        })
+        });
+        window.addEventListener("navigate", (event: CustomEvent) => {
+            const url = new URL(event.detail.url);
+            this.onNavigate(url);
+        });
     },
     components: {
         Index,
+        Sell,
         PrivacyPolicy,
         Imprint,
         Licensing,

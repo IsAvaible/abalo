@@ -13,6 +13,7 @@ import Button from 'primevue/button';
 import {debounce} from "vue-debounce";
 import {TreeNode} from "primevue/treenode";
 import {Filter} from "@/components/vue/articles/FilterChips";
+import navigate from "@/util/navigate";
 
 // Get props
 const props = defineProps({
@@ -141,7 +142,11 @@ const filterArticles = async () => {
     }
 
     // Update the history and request the new data
-    window.history.pushState({}, '', url.pathname + url.search);
+    if (props.variant === 'oldsite') {
+        window.history.pushState({}, '', url.pathname + url.search);
+    } else {
+        navigate(url);
+    }
     emit('filterChips', {filters: buildFilterChips(), clearAll: handleReset});
     try {
         if (props.variant === 'oldsite') {

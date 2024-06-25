@@ -1,25 +1,16 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
+import {defineComponent} from 'vue';
+import {mapActions, mapState} from 'pinia';
+import {useCategoryStore} from '@/components/vue/newsite/stores/CategoryStore'; // Adjust the import path as needed
 import ArticleShowcase from "@/components/vue/newsite/articles/ArticleShowcase.vue";
 import Dialog from "primevue/dialog";
 import FilterChips from "@/components/vue/articles/FilterChips.vue";
 import SortOptionDropdown from "@/components/vue/articles/SortOptionDropdown.vue";
 import ArticleFilterForm from "@/components/vue/articles/ArticleFilterForm.vue";
-import axios from "axios";
 import ShoppingCart from "@/components/ts/shoppingCart/ShoppingCart";
 
 export default defineComponent({
     name: "Route.Index.vue",
-    data() {
-        return {
-            filterChips: {},
-            filterDialogVisible: false,
-            isMobile: window.innerWidth <= 768,
-            categories: [],
-            categoriesLoaded: false,
-            sortBy: new URLSearchParams(window.location.search).get('sort_by')
-        }
-    },
     components: {
         ArticleFilterForm,
         SortOptionDropdown,
@@ -27,20 +18,31 @@ export default defineComponent({
         ArticleShowcase,
         Dialog
     },
+    data() {
+        return {
+            filterChips: {},
+            filterDialogVisible: false,
+            isMobile: window.innerWidth <= 768,
+            sortBy: new URLSearchParams(window.location.search).get('sort_by')
+        };
+    },
+    computed: {
+        // Map the state from the store
+        ...mapState(useCategoryStore, ['categories', 'categoriesLoaded'])
+    },
     mounted() {
         window.addEventListener("resize", this.handleScreenSizeChange);
-        this.loadCategories();
+        this.loadCategories(); // Load categories from the store
         const cart = ShoppingCart.getInstance();
         cart.setVariant("newsite");
         cart.bind();
     },
+    beforeUnmount() {
+        window.removeEventListener("resize", this.handleScreenSizeChange);
+    },
     methods: {
-        loadCategories() {
-            axios.get('/api/articles/categories').then(response => {
-                this.categories = response.data.categories;
-                this.categoriesLoaded = true;
-            });
-        },
+        // Map the actions from the store
+        ...mapActions(useCategoryStore, ['loadCategories']),
         handleScreenSizeChange() {
             this.isMobile = window.innerWidth <= 768;
             if (!this.isMobile) {
@@ -48,11 +50,12 @@ export default defineComponent({
             }
         }
     }
-})
+});
 </script>
 
 <template>
-    <h1 class="tracking-tight font-extrabold text-gray-900 dark:text-slate-100 text-5xl md:text-6xl text-center">Articles
+    <h1 class="tracking-tight font-extrabold text-gray-900 dark:text-slate-100 text-5xl md:text-6xl text-center">
+        Articles
         Overview</h1>
     <p class="mt-3 max-w-md mx-auto text-base text-gray-500 dark:text-slate-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
         Discover our articles below.</p>
@@ -64,7 +67,7 @@ export default defineComponent({
                            header="Configure Filters">
                     <article-filter-form
                         v-if="categoriesLoaded"
-                        v-on:filter-chips="chips => filterChips = chips"
+                        v-on:filter-chips="filterChips = $event"
                         :categories="categories"
                         variant="newsite"
                     ></article-filter-form>
@@ -87,7 +90,8 @@ export default defineComponent({
                             </svg>
                         </button>
                         <!-- Sort -->
-                        <sort-option-dropdown class="md:ml-auto" :selected-sorting-option="sortBy" variant="newsite"></sort-option-dropdown>
+                        <sort-option-dropdown class="md:ml-auto" :selected-sorting-option="sortBy"
+                                              variant="newsite"></sort-option-dropdown>
                     </div>
                     <!-- Articles -->
                     <ArticleShowcase/>

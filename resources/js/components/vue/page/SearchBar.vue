@@ -2,6 +2,7 @@
 import {onMounted, ref, watch} from 'vue';
 import {debounce} from 'vue-debounce';
 import {update} from "@/components/ts/articles/articlesOverview";
+import navigate from "@/util/navigate";
 
 // Props
 const props = defineProps({
@@ -29,6 +30,12 @@ const searching = ref<boolean>(false);
 onMounted(() => {
     if (search.value.length > 11) input.value.setAttribute('data-rtl', '');
     input.value.classList.add('transition-[padding,margin,box-shadow]');
+
+    if (props.variant === 'newsite') {
+        window.addEventListener('navigate', (event: CustomEvent) => {
+            search.value = new URL(event.detail.url).searchParams.get('search') ?? '';
+        });
+    }
 });
 
 // Search Functionality
@@ -47,11 +54,12 @@ const doSearch = async (autoSearch: boolean) => {
         url.pathname = articlesUrl;
         window.location.href = url.href;
     } else {
-        // Update the history and request the new data
-        window.history.pushState({}, '', url.pathname + url.search);
         if (props.variant === 'oldsite') {
+            // Update the history and request the new data
+            window.history.pushState({}, '', url.pathname + url.search);
             await update("/api/articles/search" + url.search);
         } else {
+            navigate(url);
             // Wait for the articles to reload
             await new Promise<void>((resolve) => {
                 document.getElementById('articles').addEventListener('load', () => {

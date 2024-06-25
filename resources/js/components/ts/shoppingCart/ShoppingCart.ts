@@ -158,6 +158,7 @@ export default class ShoppingCart {
     }
 
     public bind(): void {
+        document.getElementById('shopping-cart')!.innerHTML = '';
         document.getElementById('shopping-cart')!.appendChild(this.dialog);
         if (this.variant === 'oldsite') {
             waitForElement('#articles').then(element => {
