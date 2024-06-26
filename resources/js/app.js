@@ -50,6 +50,13 @@ if (document.getElementById('spa-app')) {
         .use(PrimeVue)
         .use(createPinia())
         .directive('tooltip', Tooltip)
-        .mount('#spa-app');
+        .mount('#spa-app')
+
+    Echo.channel('maintenance')
+        .listen('.message-updated', (e) => {
+            console.log(e);
+        }
+    );
 }
+
 
