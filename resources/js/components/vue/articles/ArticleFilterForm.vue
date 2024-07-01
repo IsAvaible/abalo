@@ -13,12 +13,17 @@ import Button from 'primevue/button';
 import {debounce} from "vue-debounce";
 import {TreeNode} from "primevue/treenode";
 import {Filter} from "@/components/vue/articles/FilterChips";
+import navigate from "@/util/navigate";
 
 // Get props
 const props = defineProps({
     categories: {
-        type: String,
         required: true,
+    },
+    variant: {
+        type: String,
+        required: false,
+        default: 'oldsite',
     }
 });
 
@@ -52,7 +57,7 @@ const conditions = {
 };
 const selectedConditions = ref(parseStringQueryArray(urlParams.get('conditions')));
 
-const categories = ref<ArticleCategory[]>(JSON.parse(props.categories))
+const categories = ref<ArticleCategory[]>(typeof props.categories === 'string' ? JSON.parse(props.categories) : props.categories);
 const selectedCategories = ref<ArticleCategory[]>(categories.value.filter(category => urlParams.get('categories') && parseNumberQueryArray(urlParams.get('categories')).includes(category.id)));
 const [nodes, map] = buildCategoryTree(categories.value);
 const categoryNodes = ref<TreeNode[]>(nodes);
@@ -137,10 +142,23 @@ const filterArticles = async () => {
     }
 
     // Update the history and request the new data
-    window.history.pushState({}, '', url.pathname + url.search);
+    if (props.variant === 'oldsite') {
+        window.history.pushState({}, '', url.pathname + url.search);
+    } else {
+        navigate(url);
+    }
     emit('filterChips', {filters: buildFilterChips(), clearAll: handleReset});
     try {
-        await update("/api/articles/search" + url.search, true)
+        if (props.variant === 'oldsite') {
+            await update("/api/articles/search" + url.search, true)
+        } else {
+            // Wait for the articles to reload
+            await new Promise<void>((resolve) => {
+                document.getElementById('articles').addEventListener('load', () => {
+                    resolve();
+                }, {once: true});
+            });
+        }
     } catch (error) {
         error.value = error.response?.data.error ? Object.entries(error.response.data.error).map(([key, value]) => `${key}: ${value}`).join('\n') : error.message;
     }

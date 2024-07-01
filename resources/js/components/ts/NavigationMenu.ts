@@ -151,30 +151,28 @@ const navMenu = new NavigationMenu(entries);
 document.querySelector("div[role='dialog']")!.appendChild(navMenu.createNavigationMenu());
 
 // 4. Add event listener to the hamburger button
-document.addEventListener('DOMContentLoaded', function() {
-    const navMenuDialog = document.getElementById('nav-menu-dialog');
-    const hamburgerButton = document.getElementById('hamburger-button');
-    const container = hamburgerButton.parentElement;
-    let isOpen = false;
+const navMenuDialog = document.getElementById('nav-menu-dialog');
+const hamburgerButton = document.getElementById('hamburger-button');
+const container = hamburgerButton.parentElement;
+let isOpen = false;
 
-    const toggleDialog = () => {
-        container.classList.toggle('group');
-        navMenuDialog.classList.toggle('opacity-0');
-        navMenuDialog.classList.toggle('pointer-events-none');
-        isOpen = !isOpen;
-    };
+const toggleDialog = () => {
+    container.classList.toggle('group');
+    navMenuDialog.classList.toggle('opacity-0');
+    navMenuDialog.classList.toggle('pointer-events-none');
+    isOpen = !isOpen;
+};
 
-    hamburgerButton.addEventListener('click', () => {
-        toggleDialog()
+hamburgerButton.addEventListener('click', () => {
+    toggleDialog()
 
-        const eventListener: EventListener = (event) => {
-            if (isOpen && !navMenuDialog.contains(event.target as Node) && !hamburgerButton.contains(event.target as Node)) {
-                toggleDialog();
-                // Remove the event listener
-                document.removeEventListener('click', eventListener);
-            }
+    const eventListener: EventListener = (event) => {
+        if (isOpen && !navMenuDialog.contains(event.target as Node) && !hamburgerButton.contains(event.target as Node)) {
+            toggleDialog();
+            // Remove the event listener
+            document.removeEventListener('click', eventListener);
         }
+    }
 
-        document.addEventListener('click', eventListener);
-    });
+    document.addEventListener('click', eventListener);
 });

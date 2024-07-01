@@ -12,6 +12,10 @@ Route::get('/user', function (Request $request) {
 Route::get('/articles/', [App\Http\Controllers\ArticleAPIController::class, 'index'])->name('api.articles');
 // Get a specific article
 Route::get('/articles/article/{articleId}', [App\Http\Controllers\ArticleAPIController::class, 'getArticle'])->name('api.articles.getArticle');
+// Mark an article as sold
+Route::post('/articles/article/{articleId}/sold', [App\Http\Controllers\ArticleAPIController::class, 'markArticleAsSold'])->name('api.articles.markAsSold');
+// Discount an article
+Route::post('/articles/article/{articleId}/discount', [App\Http\Controllers\ArticleAPIController::class, 'discountArticle'])->name('api.articles.discount');
 // Search articles
 Route::get('/articles/search', [App\Http\Controllers\ArticleAPIController::class, 'searchArticles'])->name('api.articles.searchGET');
 Route::post('/articles/search', [App\Http\Controllers\ArticleAPIController::class, 'searchArticles'])->name('api.articles.searchPOST');
@@ -23,10 +27,17 @@ Route::get('/articles/categories', [App\Http\Controllers\ArticleAPIController::c
 
 /// M3-A10
 // Get Shopping Cart ID
-Route::get('/shoppingcart/', [App\Http\Controllers\ShoppingCartAPIController::class, 'index'])->name('api.shoppingcart');
+Route::match(['get', 'post'], '/shoppingcart/', [App\Http\Controllers\ShoppingCartAPIController::class, 'index'])
+    ->name('api.shoppingcart');
 // Get Shopping Cart Articles
-Route::get('/shoppingcart/{shoppingCartId}/articles', [App\Http\Controllers\ShoppingCartAPIController::class, 'getShoppingCartItems'])->name('api.shoppingcart.getItems');
+Route::get('/shoppingcart/{shoppingCartId}/articles', [App\Http\Controllers\ShoppingCartAPIController::class, 'getShoppingCartItems'])
+    ->name('api.shoppingcart.getItems');
 // Add Article to Shopping Cart
-Route::post('/shoppingcart/{shoppingCartId}/articles/{articleId}', [App\Http\Controllers\ShoppingCartAPIController::class, 'addArticleToShoppingCart'])->name('api.shoppingcart.addArticle');
+Route::post('/shoppingcart/{shoppingCartId}/articles/{articleId}', [App\Http\Controllers\ShoppingCartAPIController::class, 'addArticleToShoppingCart'])
+    ->name('api.shoppingcart.addArticle');
 // Remove Article from Shopping Cart
-Route::delete('/shoppingcart/{shoppingCartId}/articles/{articleId}', [App\Http\Controllers\ShoppingCartAPIController::class, 'removeArticleFromShoppingCart'])->name('api.shoppingcart.removeArticle');
+Route::delete('/shoppingcart/{shoppingCartId}/articles/{articleId}', [App\Http\Controllers\ShoppingCartAPIController::class, 'removeArticleFromShoppingCart'])
+    ->name('api.shoppingcart.removeArticle');
+// Remove all Articles from Shopping Cart
+Route::delete('/shoppingcart/{shoppingCartId}/articles', [App\Http\Controllers\ShoppingCartAPIController::class, 'removeArticlesFromShoppingCart'])
+    ->name('api.shoppingcart.removeAllArticles');

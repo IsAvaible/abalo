@@ -11,19 +11,48 @@ import RouteArticlesAddArticle from "@/components/vue/routes/Route.Articles.AddA
 
 import SearchBar from "@/components/vue/page/SearchBar.vue";
 import ShoppingCart from "@/components/ts/shoppingCart/ShoppingCart";
-import "@/components/ts/NavigationMenu";
-import "@/components/ts/CookieBanner";
 
-createApp({
-    components: {
-        RouteArticles,
-        RouteArticlesAddArticle,
+import AbaloHeader from "@/components/vue/newsite/page/AbaloHeader.vue";
+import AbaloContent from "@/components/vue/newsite/page/AbaloBody.vue";
+import AbaloFooter from "@/components/vue/newsite/page/AbaloFooter.vue";
+import {createPinia} from "pinia";
+import ToastService from "primevue/toastservice";
 
-        SearchBar,
-    },
-})
-    .use(PrimeVue)
-    .directive('tooltip', Tooltip)
-    .mount('#app');
 
-ShoppingCart.getInstance();
+// SSR
+if (document.getElementById('hyd-ssr-app')) {
+    import('@/components/ts/NavigationMenu');
+    import('@/components/ts/CookieBanner');
+
+    createApp({
+        components: {
+            RouteArticles,
+            RouteArticlesAddArticle,
+
+            SearchBar,
+        },
+    })
+        .use(PrimeVue)
+        .directive('tooltip', Tooltip)
+        .mount('#hyd-ssr-app');
+
+    ShoppingCart.getInstance();
+}
+
+// SPA
+if (document.getElementById('spa-app')) {
+    createApp({
+        components: {
+            AbaloHeader,
+            AbaloContent,
+            AbaloFooter,
+        },
+    })
+        .use(PrimeVue)
+        .use(ToastService)
+        .use(createPinia())
+        .directive('tooltip', Tooltip)
+        .mount('#spa-app');
+}
+
+

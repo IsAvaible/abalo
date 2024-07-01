@@ -95,7 +95,7 @@ function getAnzahlProdukteOfKategorie(data, categoryName)
     // Variables
     let quantity = 0;
     let validCategory = false;
-    let categoryID = -1;
+    let categoryId = -1;
 
     // Check category
     data.kategorien.forEach(function(category)
@@ -103,12 +103,12 @@ function getAnzahlProdukteOfKategorie(data, categoryName)
         if (categoryName === category.name)
         {
             validCategory = true;
-            categoryID = category.id;
+            categoryId = category.id;
         }
     })
 
     // Error if category parameter does not exist in 'data'
-    if (validCategory === false) // alternatively: categoryID === -1
+    if (validCategory === false) // alternatively: categoryId === -1
     {
         console.log("Provided category does not exist.")
         return;
@@ -117,7 +117,7 @@ function getAnzahlProdukteOfKategorie(data, categoryName)
     // Find quantity of certain category
     data.produkte.forEach(function(produkt)
     {
-        if (produkt.kategorie === categoryID)
+        if (produkt.kategorie === categoryId)
         {
             quantity += produkt.anzahl;
         }

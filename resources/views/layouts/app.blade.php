@@ -8,7 +8,7 @@
     <title>@yield('title')</title>
 
     <!-- Styles -->
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.scss'])
     @yield('styles')
     <!-- Scripts -->
     @vite(['resources/js/app.js'])
@@ -16,7 +16,7 @@
 </head>
 
 <body>
-<div id="app">
+<div id="hyd-ssr-app">
     @section('page')
     <header class="w-full p-6">
         <nav class="mx-auto grid grid-cols-3 max-w-5xl">
@@ -33,7 +33,7 @@
                     Home
                 </a>
 
-                <search-bar @isset($search) search="{{$search}}" @endisset></search-bar>
+                <search-bar variant="oldsite" @isset($search) search="{{$search}}" @endisset></search-bar>
 
                 <a href="#" class="hover:scale-110 transition-transform">
                     <!-- Heart Icon -->

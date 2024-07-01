@@ -32,7 +32,7 @@ export const update = async (url: string | URL, forwardError: boolean = false) =
     } catch (error) {
         if (forwardError) throw error;
         // Handle the error
-        document.getElementById(articleShowcase.htmlElementID)!.innerHTML = '<div class="alert alert-error">An error occurred while loading the articles</div>';
+        document.getElementById(articleShowcase.htmlElementId)!.innerHTML = '<div class="alert alert-error">An error occurred while loading the articles</div>';
     }
 };
 

@@ -8,9 +8,12 @@
     "devDependencies": {
         "autoprefixer": "^10.4.19",
         "axios": "^1.7.2",
+        "laravel-echo": "^1.16.1",
         "laravel-vite-plugin": "^1.0",
         "postcss": "^8.4.38",
-        "sass": "^1.77.5",
+        "pusher-js": "^8.4.0-rc2",
+        "sass": "^1.77.6",
+        "sass-loader": "^14.2.1",
         "tailwindcss": "^3.4.3",
         "vite": "^5.0"
     },
@@ -18,6 +21,8 @@
         "@iconoir/vue": "^7.7.0",
         "@tailwindcss/container-queries": "^0.1.1",
         "@vitejs/plugin-vue": "^5.0.5",
+        "chart.js": "^4.4.3",
+        "pinia": "^2.1.7",
         "primevue": "^3.52.0",
         "vue": "^3.4.27",
         "vue-advanced-cropper": "^2.8.9",

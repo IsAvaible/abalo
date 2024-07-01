@@ -1,9 +1,19 @@
-import {formatNumberToEuro} from "../../../util/formatNumberToEuro";
+import formatNumberToEuro from "../../../util/formatNumberToEuro";
 import Article from "../articles/Article";
+import axios from "axios";
+import waitForElement from "../../../util/waitForElement";
+import {getAuthenticatedUser} from "../../../util/getAuthenticatedUser";
+
+interface ReloadListener {
+    [key: number]: () => void;
+}
 
 export default class ShoppingCart {
     private static instance: ShoppingCart;
     private cart: Article[] = [];
+    private cartId: number | null = null;
+    private reloadListeners: ReloadListener = {};
+    private variant: string = 'oldsite';
     private cartButton: HTMLButtonElement;
     private dialog: HTMLDivElement;
     private table: HTMLDivElement;
@@ -41,7 +51,7 @@ export default class ShoppingCart {
 
     private createDialog(): void {
         this.dialog = document.createElement('div');
-        this.dialog.className ='max-[1600px]:fixed bottom-20 right-4 bg-white rounded-lg max-[1600px]:shadow-lg p-4 max-[1600px]:pointer-events-none max-[1600px]:opacity-0 max-[1600px]:scale-0 origin-[calc(100%_-_2rem)_bottom] duration-300 min-w-68';
+        this.dialog.className ='max-[1600px]:fixed bottom-20 w-fit right-4 bg-white rounded-lg max-[1600px]:shadow-lg p-4 max-[1600px]:pointer-events-none max-[1600px]:opacity-0 max-[1600px]:scale-0 origin-[calc(100%_-_2rem)_bottom] duration-300 min-w-68';
         this.dialog.style.transitionProperty = 'opacity, transform';
 
         this.table = document.createElement('div');
@@ -63,7 +73,7 @@ export default class ShoppingCart {
         this.table.appendChild(this.itemTotalLabel);
 
         this.checkoutButton = document.createElement('button');
-        this.checkoutButton.textContent = 'Go to Checkout';
+        this.checkoutButton.textContent = 'Checkout';
         this.checkoutButton.className = 'bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded transition-colors col-span-3 relative';
         this.checkoutButton.title = 'Checkout';
         this.table.appendChild(this.checkoutButton);
@@ -79,23 +89,28 @@ export default class ShoppingCart {
     }
 
     private attachEventListeners(): void {
+        this.checkoutButton.addEventListener('click', async () => {
+            for (const article of this.cart) {
+                // Mark the article as sold
+                await axios.post(`/api/articles/article/${article.id}/sold`);
+            }
+            await this.clearCart();
+        });
         this.cartButton.addEventListener('click', () => this.toggleCartDialog());
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('Fetching shopping cart items...');
-            const cartID = JSON.parse(document.querySelector('meta[name="shopping-cart-id"]')!.getAttribute('content'));
-            console.log('Shopping cart ID:', cartID);
             const shoppingCartElement = document.getElementById('shopping-cart')!;
-            if (cartID!== null &&!isNaN(cartID)) {
-                const articles = JSON.parse(document.querySelector('meta[name="initial-shopping-cart-articles"]')!.getAttribute('content')!) as Article[];
-                console.log('Shopping cart articles:', articles);
-                document.getElementById('articles')!.addEventListener('load', () => {
-                    for (const article of articles) {
-                        this.addToCart(article, true);
-                    }
-                    shoppingCartElement.replaceChild(this.dialog, shoppingCartElement.firstChild);
-                    document.body.appendChild(this.cartButton);
-                }, { once: true });
+            await this.loadShoppingCartId();
+            if (this.cartId !== null && !isNaN(this.cartId)) {
+                // Load the articles from the server or the meta tag if available
+                const articles = await this.loadShoppingCartArticles();
+                console.log('Loaded articles:', articles);
+                for (const article of articles) {
+                    this.addToCart(article, true);
+                }
+                shoppingCartElement.replaceChild(this.dialog, shoppingCartElement.firstChild);
+                document.body.appendChild(this.cartButton);
             } else {
+                // Start with an empty cart if the shopping cart ID is not available
                 shoppingCartElement.replaceChild(this.dialog, shoppingCartElement.firstChild);
                 document.body.appendChild(this.cartButton);
             }
@@ -113,17 +128,77 @@ export default class ShoppingCart {
         });
     }
 
+    private async loadShoppingCartId(): Promise<void> {
+        const metaTag = document.querySelector('meta[name="shopping-cart-id"]');
+        if (metaTag !== null) {
+            // Get the shopping cart ID from the meta tag
+            this.cartId = JSON.parse(metaTag!.getAttribute('content')!);
+        } else {
+            // Get the user
+            const user = await getAuthenticatedUser();
+            // Fetch the shopping cart ID from the server
+            const response = await axios.post('/api/shoppingcart', {userId: user?.id});
+            this.cartId = response.data.shoppingCartId;
+            return;
+        }
+    }
+
+    private async loadShoppingCartArticles(forceRemote: boolean = false): Promise<Article[]> {
+        if (this.cartId === null) {
+            console.error('Shopping cart ID is null.');
+            return;
+        }
+        const metaTag = document.querySelector('meta[name="initial-shopping-cart-articles"]');
+        if (!forceRemote && metaTag !== null) {
+            return JSON.parse(metaTag!.getAttribute('content')!) as Article[];
+        } else {
+            const responseItems = await axios.get(`/api/shoppingcart/${this.cartId}/articles`);
+            if (!responseItems || !responseItems.data) return [];
+            const articleIds = responseItems.data.shoppingCartItems.map((item) => item.ab_article_id);
+            const responseArticles = await axios.post('/api/articles/search', {'articleIds': articleIds});
+
+            if (!responseArticles || !responseArticles.data) return [];
+            return responseArticles.data.articles;
+        }
+    }
+
     private toggleCartDialog(): void {
         this.dialog.classList.toggle('max-[1600px]:pointer-events-none');
         this.dialog.classList.toggle('max-[1600px]:scale-0');
         this.dialog.classList.toggle('max-[1600px]:opacity-0');
     }
 
+    public setVariant(variant: string): void {
+        if (variant !== 'oldsite' && variant !== 'newsite') {
+            console.error('Invalid variant:', variant);
+            return;
+        }
+        this.variant = variant;
+    }
+
+    public bind(): void {
+        document.getElementById('shopping-cart')!.innerHTML = '';
+        document.getElementById('shopping-cart')!.appendChild(this.dialog);
+        if (this.variant === 'oldsite') {
+            waitForElement('#articles').then(element => {
+                element.addEventListener('load', () => {
+                    for (const listener of Object.values(this.reloadListeners)) {
+                        listener();
+                        element.addEventListener('load', listener);
+                    }
+                }, {once: true});
+            });
+        }
+    }
+
+    public isInCart(article: Article): boolean {
+        return this.cart.find((a) => a.id === article.id) !== undefined;
+    }
+
     public addToCart(article: Article, fromDB: boolean = false): void {
-        const shoppingCartId = JSON.parse(document.querySelector('meta[name="shopping-cart-id"]')!.getAttribute('content')!);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-        const syncWithRemote = !fromDB && shoppingCartId && csrfToken;
+        const syncWithRemote = !fromDB && this.cartId && csrfToken;
 
         if (!fromDB && !syncWithRemote) {
             console.log("Adding article with name", article.ab_name, "to the local cart.");
@@ -148,7 +223,7 @@ export default class ShoppingCart {
 
         if (syncWithRemote) {
             // Add the article to the remote shopping cart
-            fetch(`/api/shoppingcart/${shoppingCartId}/articles/${article.id}`, {
+            fetch(`/api/shoppingcart/${this.cartId}/articles/${article.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -179,7 +254,7 @@ export default class ShoppingCart {
         itemName.textContent = article.ab_name;
         const itemPrice = document.createElement('span');
         itemPrice.textContent = formatNumberToEuro(article.ab_price);
-        itemPrice.classList.add('text-nowrap');
+        itemPrice.classList.add('text-nowrap', 'text-right');
         const itemRemoveButton = document.createElement('button');
         itemRemoveButton.innerHTML = '<svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor"  stroke-width="1.5"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 1.25C6.06294 1.25 1.25 6.06294 1.25 12C1.25 17.9371 6.06294 22.75 12 22.75C17.9371 22.75 22.75 17.9371 22.75 12C22.75 6.06294 17.9371 1.25 12 1.25ZM9.70164 8.64124C9.40875 8.34835 8.93388 8.34835 8.64098 8.64124C8.34809 8.93414 8.34809 9.40901 8.64098 9.7019L10.9391 12L8.64098 14.2981C8.34809 14.591 8.34809 15.0659 8.64098 15.3588C8.93388 15.6517 9.40875 15.6517 9.70164 15.3588L11.9997 13.0607L14.2978 15.3588C14.5907 15.6517 15.0656 15.6517 15.3585 15.3588C15.6514 15.0659 15.6514 14.591 15.3585 14.2981L13.0604 12L15.3585 9.7019C15.6514 9.40901 15.6514 8.93414 15.3585 8.64124C15.0656 8.34835 14.5907 8.34835 14.2978 8.64124L11.9997 10.9393L9.70164 8.64124Z"></path></svg>';
         itemRemoveButton.classList.add('text-slate-800', 'hover:scale-105', 'hover:text-black');
@@ -198,73 +273,14 @@ export default class ShoppingCart {
             if (!addToCartButton) return
             addToCartButton.title = 'In Cart';
             addToCartButton.disabled = true;
+        };
+        if (this.variant === 'oldsite') {
+            document.getElementById('articles')!.addEventListener('load', articlesReloadListener);
+            this.reloadListeners[article.id] = articlesReloadListener;
         }
-        document.getElementById('articles')!.addEventListener('load', articlesReloadListener);
 
         // Attach the click event listener to the remove button
-        itemRemoveButton.addEventListener('click', () => {
-            // Animate the row
-            itemRow.style.height = `${itemRow.scrollHeight}px`;
-            setTimeout(() => {
-                itemRow.style.height = '0';
-                itemRow.classList.add('opacity-0');
-            });
-
-            const shoppingCartId = JSON.parse(document.querySelector('meta[name="shopping-cart-id"]')!.getAttribute('content')!);
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-            if (shoppingCartId && csrfToken) {
-                fetch(`/api/shoppingcart/${shoppingCartId}/articles/${article.id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken!
-                    }
-                }).then(response => {
-                    if (!response || !response.ok) {
-                        return Promise.reject(response);
-                    }
-                    console.log('Successfully removed article with name', article.ab_name, 'from the remote cart.');
-                }).catch(error => {
-                    console.error('Error removing article from the remote cart:', error);
-
-                    // Re-add the article to the cart
-                    this.addToCart(article);
-                });
-            } else {
-                console.log('Removed article with name', article.ab_name, 'from the local cart.');
-            }
-
-            // Remove the articles reload listener
-            document.getElementById('articles')!.removeEventListener('load', articlesReloadListener);
-
-            // Reset the button in the overview table
-            const addToCartButton = document.querySelector(`button[data-article-id="${article.id}"]`) as HTMLButtonElement;
-            if (addToCartButton) {
-                addToCartButton.title = 'Add to Cart';
-                addToCartButton.disabled = false;
-            }
-
-            // Update the total price
-            const itemTotal = this.cart.reduce((acc, a) => acc + a.ab_price * Number(!(a.id == article.id)), 0);
-            this.itemTotalLabel.textContent = 'Total: ' + formatNumberToEuro(itemTotal);
-
-            // Hide the dialog if the cart is empty
-            if (this.cart.length === 1 && window.innerWidth <= 1600) {
-                this.toggleCartDialog();
-            }
-
-            itemRow.addEventListener('transitionend', () =>  {
-                this.cart.splice(this.cart.indexOf(article), 1);
-                itemRow.remove();
-
-                // If the cart is empty, show the warning message
-                if (this.table.children.length === 2) {
-                    this.dialog.removeChild(this.table);
-                    this.dialog.appendChild(this.noItemWarning);
-                }
-            }, {once: true});
-        }, {once: true});
+        itemRemoveButton.addEventListener('click', () => this.removeFromCart(article.id, false), {once: true});
 
         // Append the elements to the cart table
         this.table.insertBefore(itemRow, this.itemTotalLabel);
@@ -287,5 +303,117 @@ export default class ShoppingCart {
             addToCartButton.title = 'In Cart';
             addToCartButton.disabled = true;
         }
+    }
+
+    /**
+     * Remove an article from the cart.
+     * @param articleId The ID of the article to remove.
+     * @param instant Whether the removal should be instant or not.
+     * @param syncDB Whether the removal should be synced with the database.
+     */
+    public removeFromCart(articleId: number, instant: boolean = false, syncDB: boolean = true): void {
+        const article = this.cart.find((a) => a.id === articleId);
+        if (!article) {
+            console.error('Article not found in the cart.');
+            return;
+        }
+        const itemRow = document.querySelector(`div[data-article-id="${article.id}"]`) as HTMLDivElement;
+        if (!itemRow) {
+            console.error('Item row not found in the cart.');
+            return;
+        }
+        const itemRemoveButton = itemRow.querySelector('button') as HTMLButtonElement;
+        if (!itemRemoveButton) {
+            console.error('Remove button not found in the cart.');
+            return;
+        }
+
+        if (!instant) {
+            // Animate the row
+            itemRow.style.height = `${itemRow.scrollHeight}px`;
+            setTimeout(() => {
+                itemRow.style.height = '0';
+                itemRow.classList.add('opacity-0');
+            });
+        } else {
+            this.cart.splice(this.cart.indexOf(article), 1);
+            itemRow.remove();
+
+            // If the cart is empty, show the warning message
+            if (this.table.children.length === 2) {
+                this.dialog.removeChild(this.table);
+                this.dialog.appendChild(this.noItemWarning);
+            }
+        }
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        if (this.cartId && csrfToken && syncDB) {
+            fetch(`/api/shoppingcart/${this.cartId}/articles/${article.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken!
+                }
+            }).then(response => {
+                if (!response || !response.ok) {
+                    return Promise.reject(response);
+                }
+                console.log('Successfully removed article with name', article.ab_name, 'from the remote cart.');
+            }).catch(error => {
+                console.error('Error removing article from the remote cart:', error);
+
+                // Re-add the article to the cart
+                this.addToCart(article);
+            });
+        } else {
+            console.log('Removed article with name', article.ab_name, 'from the local cart.');
+        }
+
+        if (this.variant === 'oldsite') {
+            const articlesReloadListener = this.reloadListeners[article.id];
+            // Remove the articles reload listener
+            document.getElementById('articles')!.removeEventListener('load', articlesReloadListener);
+            this.reloadListeners[article.id] = undefined;
+        }
+
+        // Reset the button in the overview table
+        const addToCartButton = document.querySelector(`button[data-article-id="${article.id}"]`) as HTMLButtonElement;
+        if (addToCartButton) {
+            addToCartButton.title = 'Add to Cart';
+            addToCartButton.disabled = false;
+        }
+
+        // Update the total price
+        const itemTotal = this.cart.reduce((acc, a) => acc + a.ab_price * Number(!(a.id == article.id)), 0);
+        this.itemTotalLabel.textContent = 'Total: ' + formatNumberToEuro(itemTotal);
+
+        // Hide the dialog if the cart is empty
+        if (this.cart.length === 1 && window.innerWidth <= 1600) {
+            this.toggleCartDialog();
+        }
+
+        if (!instant) {
+            itemRow.addEventListener('transitionend', () => {
+                this.cart.splice(this.cart.indexOf(article), 1);
+                itemRow.remove();
+
+                // If the cart is empty, show the warning message
+                if (this.table.children.length === 2) {
+                    this.dialog.removeChild(this.table);
+                    this.dialog.appendChild(this.noItemWarning);
+                }
+            }, {once: true});
+        }
+    }
+
+    /**
+     * Clear the cart.
+     */
+    public async clearCart(): Promise<void> {
+        for (const article of this.cart) {
+            this.removeFromCart(article.id, true, false);
+        }
+        await axios.delete(`/api/shoppingcart/${this.cartId}/articles`);
     }
 }

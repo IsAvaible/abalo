@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ArticleDiscounted;
+use App\Events\ArticleSold;
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -25,9 +28,12 @@ class ArticleAPIController extends Controller
             'price_min' => ['numeric', 'min:0'],
             'price_max' => ['numeric', 'min:0'],
             'limit' => ['numeric', 'min:0'],
+            'page' => ['numeric', 'min:0'],
             'sort_by' => ['string', 'in:price_asc,price_desc,name_asc,name_desc'],
-            'articleIDs' => ['array'],
-            'articleIDs.*' => ['numeric', 'exists:ab_article,id'],
+            'articleIds' => ['array'],
+            'articleIds.*' => ['numeric', 'exists:ab_article,id'],
+            'userIds' => ['array'],
+            'userIds.*' => ['numeric', 'exists:ab_user,id'],
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
@@ -37,8 +43,10 @@ class ArticleAPIController extends Controller
         $search = $request->input('search'); // Search query
         $categories = $request->input('categories') ? json_decode('['.str_replace('-', ',',$request->input('categories')).']') : null; // Categories filter
         $limit = $request->input('limit'); // Limit of articles
+        $page = $request->input('page'); // Page number
         $sortBy = $request->input('sort_by'); // Sorting option
-        $articleIDs = $request->input('articleIDs'); // Array of article IDs
+        $articleIds = $request->input('articleIds'); // Array of article Ids
+        $userIds = $request->input('userIds'); // Array of user Ids
         $priceMin = $request->input('price_min'); // Minimum price
         $priceMax = $request->input('price_max'); // Maximum price
 
@@ -54,8 +62,8 @@ class ArticleAPIController extends Controller
             if (is_numeric($request->input('price_max'))) {
                 $query->where('ab_price', '<=', (int) ($priceMax * 100));
             }
-            $query->whereIn('id', $articleIDs ?? [], 'and', $articleIDs === NULL)
-            ->limit($limit);
+            $query->whereIn('id', $articleIds ?? [], 'and', $articleIds === NULL);
+            $query->whereIn('ab_creator_id', $userIds ?? [], 'and', $userIds === NULL);
             if ($sortBy) {
                 if ($sortBy == 'price_asc' || $sortBy == 'price_desc') {
                     $query->orderBy('ab_price', $sortBy == 'price_asc' ? 'asc' : 'desc');
@@ -63,7 +71,9 @@ class ArticleAPIController extends Controller
                     $query->orderBy('ab_name', $sortBy == 'name_asc' ? 'asc' : 'desc');
                 }
             }
-        $articles = $query->get();
+        // Apply limit and offset
+        $totalRecords = $query->count();
+        $articles = $query->limit($limit)->offset($page * $limit)->get();
 
         // Add the image path to each article
         foreach ($articles as $article) {
@@ -71,7 +81,7 @@ class ArticleAPIController extends Controller
         }
 
         // Respond with the articles
-        return response()->json(['articles' => $articles]);
+        return response()->json(['articles' => $articles, 'totalRecords' => $totalRecords]);
     }
 
     /**
@@ -140,6 +150,73 @@ class ArticleAPIController extends Controller
     }
 
     /**
+     * Mark an article as sold
+     */
+    public function markArticleAsSold(Request $request): JsonResponse {
+        // Merge the article ID into the request
+        $request->merge(['articleId' => $request->route('articleId')]);
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'articleId' => ['required', 'numeric', 'exists:ab_article,id'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        // Broadcast the event
+        try {
+            broadcast(new ArticleSold((int) $request->route('articleId')));
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Article not found'], 404);
+        }
+
+        // Find the article and mark it as sold
+//        $article = Article::find($request->input('articleId'));
+//        $article->ab_sold = true;
+//        $article->save();
+
+        // Respond with success message
+        return response()->json(['message' => 'Article marked as sold']);
+    }
+
+    /**
+     * Discount an article
+     */
+    public function discountArticle(Request $request): JsonResponse {
+        // Merge the article ID into the request
+        $request->merge(['articleId' => $request->route('articleId')]);
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'articleId' => ['required', 'numeric', 'exists:ab_article,id'],
+            'discount' => ['required', 'numeric', 'min:0', 'max:1'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        // Find the article
+        $article = Article::find($request->input('articleId'));
+        // Revert any previous discount
+        if ($article->ab_discount) {
+            $article->ab_price = $article->ab_price / (1 - $article->ab_discount);
+        }
+        // Apply the new discount
+        $article->ab_price = $article->ab_price * (1 - $request->input('discount'));
+        $article->ab_discount = $request->input('discount');
+        $article->save();
+
+        // Broadcast the event
+        try {
+            broadcast(new ArticleDiscounted((int) $request->route('articleId')));
+        } catch (Exception $e) {
+            return response()->json(['error' => $e], 400);
+        }
+
+        // Respond with success message
+        return response()->json(['message' => 'Article discounted', 'newPrice' => $article->ab_price]);
+    }
+
+    /**
      * Get all categories
      */
     public function getArticleCategories(Request $request): JsonResponse
@@ -153,10 +230,10 @@ class ArticleAPIController extends Controller
 
     /**
      * Find article image by ID
-     * @param int $articleID The article ID
+     * @param int $articleId The article Id
      * @return string|null The image path or NULL if not found
      */
-    public function findImage(int $articleID): ?string
+    public function findImage(int $articleId): ?string
     {
         // Get the path to the images directory
         $dir = public_path("images");
@@ -166,8 +243,8 @@ class ArticleAPIController extends Controller
         // Iterate over the files
         foreach ($files as $filePath) {
             $file = basename($filePath);
-            // Check if the file name starts with the article ID
-            if (explode('.', $file)[0] == $articleID) {
+            // Check if the file name starts with the article Id
+            if (explode('.', $file)[0] == $articleId) {
                 // Return the image path as asset
                 return asset('images/' . $file);
             }

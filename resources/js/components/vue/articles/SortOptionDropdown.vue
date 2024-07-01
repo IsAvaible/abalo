@@ -3,6 +3,7 @@ import {ref} from 'vue';
 import Dropdown from "primevue/dropdown";
 import FloatLabel from "primevue/floatlabel"
 import {update} from "@/components/ts/articles/articlesOverview";
+import navigate from "@/util/navigate";
 
 const props = defineProps({
     selectedSortingOption: {
@@ -10,6 +11,11 @@ const props = defineProps({
         required: false,
         default: null,
     },
+    variant: {
+        type: String,
+        required: false,
+        default: 'oldsite',
+    }
 });
 
 const sortingOptions = [
@@ -33,8 +39,19 @@ async function handleSelectionChange() {
         url.searchParams.delete('sort_by');
     }
 
-    window.history.pushState({}, '', url.pathname + url.search);
-    await update("/api/articles/search" + url.search);
+    if (props.variant === 'oldsite') {
+        window.history.pushState({}, '', url.pathname + url.search);
+        await update("/api/articles/search" + url.search);
+    } else {
+        navigate(url);
+        // Wait for the articles to reload
+        await new Promise<void>((resolve) => {
+            document.getElementById('articles').addEventListener('load', () => {
+                resolve();
+            }, {once: true});
+        });
+    }
+
     loading.value = false;
 }
 </script>

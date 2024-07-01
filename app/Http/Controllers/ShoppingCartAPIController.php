@@ -6,6 +6,7 @@ use App\Models\ShoppingCart;
 use App\Models\ShoppingCartItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -13,13 +14,20 @@ class ShoppingCartAPIController
 {
     public function index(Request $request): JsonResponse
     {
+        $validator = Validator::make($request->all(), [
+            'userId' => ['numeric', 'exists:ab_user,id'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
         // Check if the user is authenticated
-//        if (!$request->user()) {
-//            return response()->json(['error' => 'Unauthorized users cannot create or access shopping carts'], 401);
-//        }
+        if (!Auth::user() && !$request->input('userId')) {
+            return response()->json(['error' => 'Unauthorized users cannot create or access shopping carts'], 401);
+        }
+
         // If no shopping cart exists, create a new one
-        $shoppingCart = ShoppingCart::where('ab_creator_id', $request->user()->id ?? 1)->first();
-        if ($shoppingCart->exists()) {
+        $shoppingCart = ShoppingCart::where('ab_creator_id', Auth::user()->id ?? $request->input('userId'))->first();
+        if ($shoppingCart && $shoppingCart->exists()) {
             return response()->json(['shoppingCartId' => $shoppingCart->id], 200);
         } else {
             return $this->createShoppingCart($request);
@@ -35,7 +43,7 @@ class ShoppingCartAPIController
     {
         // Create a new shopping cart
         $shoppingCart = new ShoppingCart();
-        $shoppingCart->ab_creator_id = $request->user()->id ?? 1;
+        $shoppingCart->ab_creator_id = Auth::user()->id ?? $request->input('userId');
         $shoppingCart->save();
 
         // Respond with the shopping cart ID
@@ -121,4 +129,37 @@ class ShoppingCartAPIController
         // Respond with success message
         return response()->json(['message' => 'Article removed from shopping cart successfully'], 204);
     }
+
+    /**
+     * Remove all articles from the shopping cart
+     * @param Request $request The request
+     * @return JsonResponse The response
+     */
+    public function removeArticlesFromShoppingCart(Request $request): JsonResponse
+    {
+        // Add the shopping cart ID to the request
+        $request->merge(['shoppingCartId' => $request->route('shoppingCartId')]);
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'shoppingCartId' => ['required', 'numeric', 'exists:ab_shoppingcart,id'],
+            'articleIds' => ['array'],
+            'articleIds.*' => ['numeric', 'exists:ab_shoppingcart_item,ab_article_id'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        // Select all shopping cart items in the cart
+        $deleteRequest = ShoppingCartItem::where('ab_shoppingcart_id', $request->route('shoppingCartId'));
+        if ($request->has('articleIds')) {
+            // Filter the shopping cart items by the article IDs
+            $deleteRequest->whereIn('ab_article_id', $request->input('articleIds'));
+        }
+        // Delete the remaining shopping cart items
+        $deleteRequest->delete();
+
+        // Respond with success message
+        return response()->json(['message' => 'Articles removed from shopping cart successfully'], 204);
+    }
+
 }
