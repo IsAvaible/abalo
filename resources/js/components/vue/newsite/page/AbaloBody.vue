@@ -2,10 +2,14 @@
 import {defineComponent} from 'vue'
 import Index from "@/components/vue/newsite/routes/Route.Index.vue";
 import Sell from "@/components/vue/newsite/routes/Route.Sell.vue";
+import Profile from "@/components/vue/newsite/routes/Route.Profile.vue";
 import PrivacyPolicy from "@/components/vue/newsite/routes/Route.PrivacyPolicy.vue";
 import Imprint from "@/components/vue/newsite/routes/Route.Imprint.vue";
 import Licensing from "@/components/vue/newsite/routes/Route.Licensing.vue";
 import NotFound from "@/components/vue/newsite/routes/Route.NotFound.vue";
+import Toast from "primevue/toast";
+import {getAuthenticatedUser} from "@/util/getAuthenticatedUser";
+import formatNumberToEuro from "@/util/formatNumberToEuro";
 
 export default defineComponent({
     name: "AbaloBody",
@@ -21,15 +25,18 @@ export default defineComponent({
          * @param url The URL to update the content for
          */
         onNavigate(url: URL) {
-            switch (url.pathname.replace(/^\/newsite/, "")) {
+            switch (url.pathname.replace(/^\/newsite/, "").replace(/\/$/, "")) {
                 case "":
-                case "/":
                     document.title = "Abalo - Home";
                     this.component = "Index";
                     break;
                 case "/sell":
                     document.title = "Abalo - Sell Article";
                     this.component = "Sell";
+                    break;
+                case "/profile":
+                    document.title = "Abalo - Profile";
+                    this.component = "Profile";
                     break;
                 case "/privacy":
                     document.title = "Abalo - Privacy Policy";
@@ -61,20 +68,49 @@ export default defineComponent({
             const url = new URL(event.detail.url);
             this.onNavigate(url);
         });
+
+        // Register the Echo listeners
+        Echo.channel('maintenance')
+            .listen('.message-updated', (e) => {
+                    this.$toast.add({
+                        severity: 'info',
+                        summary: 'Maintenance Message Updated',
+                        detail: e.message
+                    });
+                }
+            );
+
+        getAuthenticatedUser().then(user => {
+            Echo.channel('user.' + user.id)
+                .listen('.article-sold', (e) => {
+                        this.$toast.add({
+                            severity: 'success',
+                            summary: 'Article Sold',
+                            detail:
+                                e.article.ab_discount > 0 ?
+                                    'Your article "' + e.article.ab_name + '" was sold for ' + formatNumberToEuro(e.article.ab_price) + ' with a discount of ' + (e.article.ab_discount * 100) + '%.' :
+                                    'Your article "' + e.article.ab_name + '" was sold for ' + formatNumberToEuro(e.article.ab_price) + '.'
+                        });
+                    }
+                );
+        });
     },
     components: {
         Index,
         Sell,
+        Profile,
         PrivacyPolicy,
         Imprint,
         Licensing,
-        NotFound
+        NotFound,
+        Toast
     }
 })
 </script>
 
 <template>
     <div class="min-h-[calc(100svh_-_5rem)] flex flex-col">
+        <Toast></Toast>
         <component :is="component" />
     </div>
 </template>

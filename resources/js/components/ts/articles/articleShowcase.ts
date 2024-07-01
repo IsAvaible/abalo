@@ -2,18 +2,18 @@ import ArticleCard from './ArticleCard'; // Assuming ArticleCard is exported as 
 
 export default class ArticleShowcase
 {
-    htmlElementID: string;
+    htmlElementId: string;
     articleCards: ArticleCard[] = [];
 
-    constructor(htmlElementID: string)
+    constructor(htmlElementId: string)
     {
-        this.htmlElementID = htmlElementID;
+        this.htmlElementId = htmlElementId;
     }
 
     // (Re)renders the showcase
     render()
     {
-        const htmlElement = document.getElementById(this.htmlElementID)!;
+        const htmlElement = document.getElementById(this.htmlElementId)!;
         // Clear the showcase
         htmlElement.innerHTML = '';
 

@@ -2,24 +2,34 @@
 
 namespace App\Events;
 
+use App\Models\Article;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class MaintenanceMessageUpdated implements ShouldBroadcast
+class ArticleDiscounted implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public string $message;
+    public int $articleId;
+
+    public Article $article;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(string $message)
+    public function __construct(int $articleId)
     {
-        $this->message = $message;
+        $article = Article::find($articleId);
+
+        if ($article === null) {
+            throw new \Exception('Article not found');
+        }
+
+        $this->articleId = $articleId;
+        $this->article = $article;
     }
 
     /**
@@ -30,7 +40,9 @@ class MaintenanceMessageUpdated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('maintenance'),
+            new Channel('user.' . $this->article->ab_creator_id),
+            new Channel('article.' . $this->articleId),
+            new Channel('articles'),
         ];
     }
 
@@ -39,16 +51,14 @@ class MaintenanceMessageUpdated implements ShouldBroadcast
      */
     public function broadcastAs(): string
     {
-        return 'message-updated';
+        return 'article-discounted';
     }
 
     /**
-     * Get the data to broadcast.
-     *
-     * @return array<string, mixed>
+     * The event's broadcast data.
      */
     public function broadcastWith(): array
     {
-        return ['message' => $this->message];
+        return ['article' => $this->article, 'discount' => $this->article->ab_discount];
     }
 }

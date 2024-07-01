@@ -70,7 +70,7 @@ export default defineComponent({
                     <IconCart class="w-6 h-6" />
                 </a>
                 <!-- Profile Icon -->
-                <a href="#" class="hover:scale-110 transition-transform">
+                <a href="/newsite/profile" @click.prevent="this.navigate($event.currentTarget)" class="hover:scale-110 transition-transform">
                     <IconUser class="w-6 h-6" />
                 </a>
                 <!-- Hamburger Menu -->

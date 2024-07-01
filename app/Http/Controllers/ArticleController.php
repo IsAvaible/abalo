@@ -33,7 +33,7 @@ class ArticleController extends Controller
                 $articleIds = array_map(function($item) { return $item->ab_article_id; }, $shoppingCartItems);
 
                 // Get the articles
-                $apiRequest = Request::create('/api/articles/search', 'POST', ['articleIDs' => $articleIds]);
+                $apiRequest = Request::create('/api/articles/search', 'POST', ['articleIds' => $articleIds]);
                 $response = app()->handle($apiRequest);
 
                 if ($response->isOk()) {

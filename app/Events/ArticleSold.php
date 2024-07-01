@@ -2,24 +2,34 @@
 
 namespace App\Events;
 
+use App\Models\Article;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class MaintenanceMessageUpdated implements ShouldBroadcast
+class ArticleSold implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public string $message;
+    public int $articleId;
+    public Article $article;
 
     /**
      * Create a new event instance.
+     * @throws \Exception
      */
-    public function __construct(string $message)
+    public function __construct(int $articleId)
     {
-        $this->message = $message;
+        $article = Article::find($articleId);
+
+        if ($article === null) {
+            throw new \Exception('Article not found');
+        }
+
+        $this->article = $article;
+        $this->articleId = $articleId;
     }
 
     /**
@@ -30,7 +40,10 @@ class MaintenanceMessageUpdated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('maintenance'),
+            // These channels should be private, but I couldn't figure out authentication
+            new Channel('user.' . $this->article->ab_creator_id),
+            new Channel('article.' . $this->articleId),
+            new Channel('articles'),
         ];
     }
 
@@ -39,7 +52,7 @@ class MaintenanceMessageUpdated implements ShouldBroadcast
      */
     public function broadcastAs(): string
     {
-        return 'message-updated';
+        return 'article-sold';
     }
 
     /**
@@ -49,6 +62,6 @@ class MaintenanceMessageUpdated implements ShouldBroadcast
      */
     public function broadcastWith(): array
     {
-        return ['message' => $this->message];
+        return ['article' => $this->article];
     }
 }

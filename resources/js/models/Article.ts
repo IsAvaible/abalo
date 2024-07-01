@@ -5,6 +5,7 @@ export default interface Article {
     id: number;
     ab_name: string;
     ab_price: number;
+    ab_discount: number;
     ab_description: string;
     ab_creator_id: number;
     ab_createdate: Date;

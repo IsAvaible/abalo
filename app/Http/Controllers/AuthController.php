@@ -13,6 +13,7 @@ class AuthController extends Controller
 {
     public function login(Request $request) {
         $request->session()->put('abalo_user', 'visitor');
+        $request->session()->put('abalo_user_id', 5); // arbitrary user id for testing
         $request->session()->put('abalo_mail', 'visitor@abalo.example.com');
         $request->session()->put('abalo_time', time());
         return redirect()->route('haslogin');
@@ -27,6 +28,7 @@ class AuthController extends Controller
     public function isLoggedIn(Request $request) {
         if($request->session()->has('abalo_user')) {
             $r["user"] = $request->session()->get('abalo_user');
+            $r["id"] = $request->session()->get('abalo_user_id');
             $r["time"] = $request->session()->get('abalo_time');
             $r["mail"] = $request->session()->get('abalo_mail');
             $r["auth"] = "true";

@@ -16,6 +16,7 @@ import AbaloHeader from "@/components/vue/newsite/page/AbaloHeader.vue";
 import AbaloContent from "@/components/vue/newsite/page/AbaloBody.vue";
 import AbaloFooter from "@/components/vue/newsite/page/AbaloFooter.vue";
 import {createPinia} from "pinia";
+import ToastService from "primevue/toastservice";
 
 
 // SSR
@@ -48,15 +49,10 @@ if (document.getElementById('spa-app')) {
         },
     })
         .use(PrimeVue)
+        .use(ToastService)
         .use(createPinia())
         .directive('tooltip', Tooltip)
-        .mount('#spa-app')
-
-    Echo.channel('maintenance')
-        .listen('.message-updated', (e) => {
-            console.log(e);
-        }
-    );
+        .mount('#spa-app');
 }
 
 

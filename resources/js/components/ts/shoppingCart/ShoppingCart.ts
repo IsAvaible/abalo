@@ -2,12 +2,17 @@ import formatNumberToEuro from "../../../util/formatNumberToEuro";
 import Article from "../articles/Article";
 import axios from "axios";
 import waitForElement from "../../../util/waitForElement";
+import {getAuthenticatedUser} from "../../../util/getAuthenticatedUser";
+
+interface ReloadListener {
+    [key: number]: () => void;
+}
 
 export default class ShoppingCart {
     private static instance: ShoppingCart;
     private cart: Article[] = [];
     private cartId: number | null = null;
-    private reloadListeners: Array<() => void> = [];
+    private reloadListeners: ReloadListener = {};
     private variant: string = 'oldsite';
     private cartButton: HTMLButtonElement;
     private dialog: HTMLDivElement;
@@ -68,7 +73,7 @@ export default class ShoppingCart {
         this.table.appendChild(this.itemTotalLabel);
 
         this.checkoutButton = document.createElement('button');
-        this.checkoutButton.textContent = 'Go to Checkout';
+        this.checkoutButton.textContent = 'Checkout';
         this.checkoutButton.className = 'bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded transition-colors col-span-3 relative';
         this.checkoutButton.title = 'Checkout';
         this.table.appendChild(this.checkoutButton);
@@ -84,20 +89,26 @@ export default class ShoppingCart {
     }
 
     private attachEventListeners(): void {
+        this.checkoutButton.addEventListener('click', async () => {
+            for (const article of this.cart) {
+                // Mark the article as sold
+                await axios.post(`/api/articles/article/${article.id}/sold`);
+            }
+            await this.clearCart();
+        });
         this.cartButton.addEventListener('click', () => this.toggleCartDialog());
         document.addEventListener('DOMContentLoaded', async () => {
-            await this.loadShoppingCartId();
             const shoppingCartElement = document.getElementById('shopping-cart')!;
+            await this.loadShoppingCartId();
             if (this.cartId !== null && !isNaN(this.cartId)) {
                 // Load the articles from the server or the meta tag if available
                 const articles = await this.loadShoppingCartArticles();
-                document.getElementById('articles')!.addEventListener('load', () => {
-                    for (const article of articles) {
-                        this.addToCart(article, true);
-                    }
-                    shoppingCartElement.replaceChild(this.dialog, shoppingCartElement.firstChild);
-                    document.body.appendChild(this.cartButton);
-                }, { once: true });
+                console.log('Loaded articles:', articles);
+                for (const article of articles) {
+                    this.addToCart(article, true);
+                }
+                shoppingCartElement.replaceChild(this.dialog, shoppingCartElement.firstChild);
+                document.body.appendChild(this.cartButton);
             } else {
                 // Start with an empty cart if the shopping cart ID is not available
                 shoppingCartElement.replaceChild(this.dialog, shoppingCartElement.firstChild);
@@ -118,15 +129,17 @@ export default class ShoppingCart {
     }
 
     private async loadShoppingCartId(): Promise<void> {
-        if (document.querySelector('meta[name="shopping-cart-id"]') !== null) {
+        const metaTag = document.querySelector('meta[name="shopping-cart-id"]');
+        if (metaTag !== null) {
             // Get the shopping cart ID from the meta tag
-            this.cartId = JSON.parse(document.querySelector('meta[name="shopping-cart-id"]')!.getAttribute('content')!);
+            this.cartId = JSON.parse(metaTag!.getAttribute('content')!);
         } else {
-            this.cartId = null;
-            return;
+            // Get the user
+            const user = await getAuthenticatedUser();
             // Fetch the shopping cart ID from the server
-            const response = await axios.get('/api/shoppingcart');
+            const response = await axios.post('/api/shoppingcart', {userId: user?.id});
             this.cartId = response.data.shoppingCartId;
+            return;
         }
     }
 
@@ -135,11 +148,17 @@ export default class ShoppingCart {
             console.error('Shopping cart ID is null.');
             return;
         }
-        if (!forceRemote && document.querySelector('meta[name="initial-shopping-cart-articles"]')) {
-            return JSON.parse(document.querySelector('meta[name="initial-shopping-cart-articles"]')!.getAttribute('content')!) as Article[];
+        const metaTag = document.querySelector('meta[name="initial-shopping-cart-articles"]');
+        if (!forceRemote && metaTag !== null) {
+            return JSON.parse(metaTag!.getAttribute('content')!) as Article[];
         } else {
-            const response = await axios.get(`/api/shoppingcart/${this.cartId}/articles`);
-            return response.data.articles as Article[];
+            const responseItems = await axios.get(`/api/shoppingcart/${this.cartId}/articles`);
+            if (!responseItems || !responseItems.data) return [];
+            const articleIds = responseItems.data.shoppingCartItems.map((item) => item.ab_article_id);
+            const responseArticles = await axios.post('/api/articles/search', {'articleIds': articleIds});
+
+            if (!responseArticles || !responseArticles.data) return [];
+            return responseArticles.data.articles;
         }
     }
 
@@ -163,7 +182,7 @@ export default class ShoppingCart {
         if (this.variant === 'oldsite') {
             waitForElement('#articles').then(element => {
                 element.addEventListener('load', () => {
-                    for (const listener of this.reloadListeners) {
+                    for (const listener of Object.values(this.reloadListeners)) {
                         listener();
                         element.addEventListener('load', listener);
                     }
@@ -257,75 +276,11 @@ export default class ShoppingCart {
         };
         if (this.variant === 'oldsite') {
             document.getElementById('articles')!.addEventListener('load', articlesReloadListener);
-            this.reloadListeners.push(articlesReloadListener);
+            this.reloadListeners[article.id] = articlesReloadListener;
         }
 
         // Attach the click event listener to the remove button
-        itemRemoveButton.addEventListener('click', () => {
-            // Animate the row
-            itemRow.style.height = `${itemRow.scrollHeight}px`;
-            setTimeout(() => {
-                itemRow.style.height = '0';
-                itemRow.classList.add('opacity-0');
-            });
-
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-            if (this.cartId && csrfToken) {
-                fetch(`/api/shoppingcart/${this.cartId}/articles/${article.id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken!
-                    }
-                }).then(response => {
-                    if (!response || !response.ok) {
-                        return Promise.reject(response);
-                    }
-                    console.log('Successfully removed article with name', article.ab_name, 'from the remote cart.');
-                }).catch(error => {
-                    console.error('Error removing article from the remote cart:', error);
-
-                    // Re-add the article to the cart
-                    this.addToCart(article);
-                });
-            } else {
-                console.log('Removed article with name', article.ab_name, 'from the local cart.');
-            }
-
-            if (this.variant === 'oldsite') {
-                // Remove the articles reload listener
-                document.getElementById('articles')!.removeEventListener('load', articlesReloadListener);
-                this.reloadListeners.splice(this.reloadListeners.indexOf(articlesReloadListener), 1);
-            }
-
-            // Reset the button in the overview table
-            const addToCartButton = document.querySelector(`button[data-article-id="${article.id}"]`) as HTMLButtonElement;
-            if (addToCartButton) {
-                addToCartButton.title = 'Add to Cart';
-                addToCartButton.disabled = false;
-            }
-
-            // Update the total price
-            const itemTotal = this.cart.reduce((acc, a) => acc + a.ab_price * Number(!(a.id == article.id)), 0);
-            this.itemTotalLabel.textContent = 'Total: ' + formatNumberToEuro(itemTotal);
-
-            // Hide the dialog if the cart is empty
-            if (this.cart.length === 1 && window.innerWidth <= 1600) {
-                this.toggleCartDialog();
-            }
-
-            itemRow.addEventListener('transitionend', () =>  {
-                this.cart.splice(this.cart.indexOf(article), 1);
-                itemRow.remove();
-
-                // If the cart is empty, show the warning message
-                if (this.table.children.length === 2) {
-                    this.dialog.removeChild(this.table);
-                    this.dialog.appendChild(this.noItemWarning);
-                }
-            }, {once: true});
-        }, {once: true});
+        itemRemoveButton.addEventListener('click', () => this.removeFromCart(article.id, false), {once: true});
 
         // Append the elements to the cart table
         this.table.insertBefore(itemRow, this.itemTotalLabel);
@@ -348,5 +303,117 @@ export default class ShoppingCart {
             addToCartButton.title = 'In Cart';
             addToCartButton.disabled = true;
         }
+    }
+
+    /**
+     * Remove an article from the cart.
+     * @param articleId The ID of the article to remove.
+     * @param instant Whether the removal should be instant or not.
+     * @param syncDB Whether the removal should be synced with the database.
+     */
+    public removeFromCart(articleId: number, instant: boolean = false, syncDB: boolean = true): void {
+        const article = this.cart.find((a) => a.id === articleId);
+        if (!article) {
+            console.error('Article not found in the cart.');
+            return;
+        }
+        const itemRow = document.querySelector(`div[data-article-id="${article.id}"]`) as HTMLDivElement;
+        if (!itemRow) {
+            console.error('Item row not found in the cart.');
+            return;
+        }
+        const itemRemoveButton = itemRow.querySelector('button') as HTMLButtonElement;
+        if (!itemRemoveButton) {
+            console.error('Remove button not found in the cart.');
+            return;
+        }
+
+        if (!instant) {
+            // Animate the row
+            itemRow.style.height = `${itemRow.scrollHeight}px`;
+            setTimeout(() => {
+                itemRow.style.height = '0';
+                itemRow.classList.add('opacity-0');
+            });
+        } else {
+            this.cart.splice(this.cart.indexOf(article), 1);
+            itemRow.remove();
+
+            // If the cart is empty, show the warning message
+            if (this.table.children.length === 2) {
+                this.dialog.removeChild(this.table);
+                this.dialog.appendChild(this.noItemWarning);
+            }
+        }
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        if (this.cartId && csrfToken && syncDB) {
+            fetch(`/api/shoppingcart/${this.cartId}/articles/${article.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken!
+                }
+            }).then(response => {
+                if (!response || !response.ok) {
+                    return Promise.reject(response);
+                }
+                console.log('Successfully removed article with name', article.ab_name, 'from the remote cart.');
+            }).catch(error => {
+                console.error('Error removing article from the remote cart:', error);
+
+                // Re-add the article to the cart
+                this.addToCart(article);
+            });
+        } else {
+            console.log('Removed article with name', article.ab_name, 'from the local cart.');
+        }
+
+        if (this.variant === 'oldsite') {
+            const articlesReloadListener = this.reloadListeners[article.id];
+            // Remove the articles reload listener
+            document.getElementById('articles')!.removeEventListener('load', articlesReloadListener);
+            this.reloadListeners[article.id] = undefined;
+        }
+
+        // Reset the button in the overview table
+        const addToCartButton = document.querySelector(`button[data-article-id="${article.id}"]`) as HTMLButtonElement;
+        if (addToCartButton) {
+            addToCartButton.title = 'Add to Cart';
+            addToCartButton.disabled = false;
+        }
+
+        // Update the total price
+        const itemTotal = this.cart.reduce((acc, a) => acc + a.ab_price * Number(!(a.id == article.id)), 0);
+        this.itemTotalLabel.textContent = 'Total: ' + formatNumberToEuro(itemTotal);
+
+        // Hide the dialog if the cart is empty
+        if (this.cart.length === 1 && window.innerWidth <= 1600) {
+            this.toggleCartDialog();
+        }
+
+        if (!instant) {
+            itemRow.addEventListener('transitionend', () => {
+                this.cart.splice(this.cart.indexOf(article), 1);
+                itemRow.remove();
+
+                // If the cart is empty, show the warning message
+                if (this.table.children.length === 2) {
+                    this.dialog.removeChild(this.table);
+                    this.dialog.appendChild(this.noItemWarning);
+                }
+            }, {once: true});
+        }
+    }
+
+    /**
+     * Clear the cart.
+     */
+    public async clearCart(): Promise<void> {
+        for (const article of this.cart) {
+            this.removeFromCart(article.id, true, false);
+        }
+        await axios.delete(`/api/shoppingcart/${this.cartId}/articles`);
     }
 }
