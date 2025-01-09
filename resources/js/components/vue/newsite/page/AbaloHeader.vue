@@ -45,7 +45,7 @@ export default defineComponent({
         <nav class="mx-auto grid grid-cols-3 max-w-5xl">
             <div>
                 <a href="/newsite" @click.prevent="this.navigate($event.currentTarget)" class="flex flex-row gap-x-2 items-center text-2xl font-bold text-slate-800">
-                    <img src="https://tailwindui.com/img/logos/mark.svg?color=black" alt="Logo" class="h-8">
+                    <img src="/public/images/logo.svg" alt="Logo" class="h-8">
                     <span class="max-sm:hidden">Abalo</span>
                 </a>
             </div>
