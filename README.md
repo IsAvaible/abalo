@@ -18,6 +18,20 @@ It partially implements a webshop where users can view products, add them to the
   - Email: [dennis.costa@alumni.fh-aachen.de](mailto:dennis.costa@alumni.fh-aachen.de)
   - GitLab: https://git.fh-aachen.de/dc9239s
 
+## Features
+### Core Features:
+
+* **Product Display**: Intuitive grid layout with images, titles, descriptions, and prices. 
+* **Filtering & Sorting**: Filter by condition, category, price, shipping, or country. Sort by price ascending or descending.
+* **Shopping Cart:** Real-time cart with item details, remove option, and quick checkout.
+* **Seller Profiles:** Sellers can manage their products and orders and view sales reports,
+
+### Technical Features:
+
+* **Built with:** Laravel, Vue.js, MariaDB, Tailwind CSS
+* **Networking:** RESTful API, Axios, Laravel Websockets
+* **Concepts:** MVC, ORM, Middleware, Seeders, Database Migrations
+
 ## Installation
 1. Clone the [repository](https://git.fh-aachen.de/sc1103s/abalo)
 2. Install the required packages using the following commands:
