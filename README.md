@@ -1,8 +1,11 @@
-# ReadMe
+# Abalo
 
 ## Description
 This is a simple Laravel project made for the module `Datenbanken und Webtechnologien 2` in SS 2024. The project uses Laravel as the backend and Vue.js as the frontend.
 It partially implements a webshop where users can view products, add them to their cart and rate them.
+
+# Screenshot
+![Screenshot of the Homepage](/documentation/screenshots/Homepage.png)
 
 ## Authors
 #### Simon Conrad
@@ -32,3 +35,7 @@ php artisan serve
 The documentation can be found in the `dossier` directory. It contains the following files:
 - [BRANCHING.md](dossier/BRANCHING.md): Contains the branching strategy used in the project
 - [M1.md](dossier/M1.md): Contains the documentation for the first milestone
+- [M2.md](dossier/M2.md): Contains the documentation for the second milestone
+- [M3.md](dossier/M3.md): Contains the documentation for the third milestone
+- [M4.md](dossier/M4.md): Contains the documentation for the fourth milestone
+- [M5.md](dossier/M5.md): Contains the documentation for the fifth milestone
