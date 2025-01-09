@@ -62,6 +62,8 @@ export default defineComponent({
 
     },
     beforeUnmount() {
+        // @ts-ignore
+        window.Echo.leave('articles');
         window.removeEventListener("popstate", this.navigationListener);
     },
     methods: {

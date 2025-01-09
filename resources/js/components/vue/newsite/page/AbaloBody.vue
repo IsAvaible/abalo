@@ -70,7 +70,8 @@ export default defineComponent({
         });
 
         // Register the Echo listeners
-        Echo.channel('maintenance')
+        // @ts-ignore
+        window.Echo.channel('maintenance')
             .listen('.message-updated', (e) => {
                     this.$toast.add({
                         severity: 'info',
@@ -81,7 +82,8 @@ export default defineComponent({
             );
 
         getAuthenticatedUser().then(user => {
-            Echo.channel('user.' + user.id)
+            // @ts-ignore
+            window.Echo.channel('user.' + user.id)
                 .listen('.article-sold', (e) => {
                         this.$toast.add({
                             severity: 'success',
@@ -93,6 +95,14 @@ export default defineComponent({
                         });
                     }
                 );
+        });
+    },
+    beforeUnmount() {
+        // @ts-ignore
+        window.Echo.leave('maintenance');
+        getAuthenticatedUser().then(user => {
+            // @ts-ignore
+            window.Echo.leave('user.' + user.id);
         });
     },
     components: {
