@@ -35,15 +35,36 @@ It partially implements a webshop where users can view products, add them to the
 ## Installation
 1. Clone the [repository](https://git.fh-aachen.de/sc1103s/abalo)
 2. Install the required packages using the following commands:
-```bash
-php composer install
-npm install
-```
-3. Run the following two commands in parallel to serve the frontend and backend:
-```bash
-npm run dev &
-php artisan serve
-```
+    ```bash
+    php composer install
+    npm install
+    ```
+3. Setup the database
+    - Install PostgreSQL
+    - Connect to PostgreSQL as a superuser (e.g. postgres)
+    - Create the application role and database:
+        ```postgresql
+        CREATE ROLE dev WITH LOGIN PASSWORD 'dev';
+        CREATE DATABASE abalo OWNER dev;
+        GRANT ALL PRIVILEGES ON DATABASE abalo TO dev;
+        ALTER ROLE dev CREATEDB;
+        ```
+    - Run Laravel migrations and seed the database:
+        ```shell
+        php artisan migrate:fresh
+        php artisan db:seed
+        ```
+4. Enable the PostgreSQL PHP Driver
+5. Create a copy of .env.example and rename it to .env. Adjust any values that do not match your configuration
+6. Run the following four commands in parallel to serve the frontend and backend:
+    ```bash
+    npm run dev &
+    php artisan serve &
+    php artisan queue:work &
+    php artisan reverb:start --debug
+    ```
+   
+The site should now be accessible under http://localhost:8000/newsite
 
 ## Documentation
 The documentation can be found in the `dossier` directory. It contains the following files:
